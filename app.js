@@ -64,6 +64,17 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+async function logUserAction(actionType, actionText) {
+  if (!supabaseClient || !currentUser) return;
+
+  await supabaseClient.from("user_actions").insert({
+    user_id: currentUser.id,
+    user_email: currentUser.email,
+    action_type: actionType,
+    action_text: actionText,
+  });
+}
+
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
@@ -165,9 +176,9 @@ async function initAuth() {
 }
 
 async function afterLogin() {
- await fetchProfile();
-await loadRemoteEnglishProgress();
-await loadRemoteChineseProgress();
+  await fetchProfile();
+  await loadRemoteEnglishProgress();
+  await loadRemoteChineseProgress();
 
   const settings = getSavedSettings();
   applyTheme(settings.theme, settings.color);
@@ -188,6 +199,8 @@ await loadRemoteChineseProgress();
   renderChineseCard();
 
   renderProfile();
+
+  await logUserAction("auth", "Пользователь вошел на сайт");
 
   if (!profile?.selected_year) {
     showScreen("yearScreen");
@@ -283,6 +296,8 @@ function setupNavigation() {
       };
     }
 
+    await logUserAction("year", `Выбрал учебный год: ${selectedYear}`);
+
     showScreen("welcomeScreen");
 
     setTimeout(() => {
@@ -294,8 +309,15 @@ function setupNavigation() {
     button.addEventListener("click", () => {
       const course = button.dataset.course;
 
-      if (course === "english") showScreen("englishScreen");
-      if (course === "chinese") showScreen("chineseScreen");
+      if (course === "english") {
+        showScreen("englishScreen");
+        logUserAction("course", "Открыл раздел English");
+      }
+
+      if (course === "chinese") {
+        showScreen("chineseScreen");
+        logUserAction("course", "Открыл раздел Chinese");
+      }
     });
   });
 
@@ -310,6 +332,7 @@ function setupNavigation() {
       const screenId = button.dataset.backScreen;
 
       if (screenId === "authScreen" && supabaseClient && currentUser) {
+        await logUserAction("auth", "Пользователь вышел из аккаунта");
         await supabaseClient.auth.signOut();
         return;
       }
@@ -321,26 +344,24 @@ function setupNavigation() {
   $("profileOpenBtn").addEventListener("click", () => {
     renderProfile();
     showScreen("profileScreen");
+    logUserAction("profile", "Открыл профиль");
   });
 
   $("settingsOpenBtn").addEventListener("click", () => {
     showScreen("settingsScreen");
+    logUserAction("settings", "Открыл настройки");
   });
 
   $("adminOpenBtn").addEventListener("click", async () => {
     showScreen("adminScreen");
-
-    $("adminSuggestionsTab").classList.add("active");
-    $("adminUsersTab").classList.remove("active");
-
-    $("adminSuggestionsBox").classList.remove("hidden");
-    $("adminUsersBox").classList.add("hidden");
-
+    setAdminTab("suggestions");
+    await logUserAction("admin", "Открыл админ-панель");
     await loadSuggestionsForAdmin();
   });
 
   $("logoutBtn").addEventListener("click", async () => {
     if (supabaseClient) {
+      await logUserAction("auth", "Пользователь вышел из аккаунта");
       await supabaseClient.auth.signOut();
     }
 
@@ -753,14 +774,20 @@ function setupEnglishTrainer() {
 
     saveLocalEnglishProgress();
     await saveRemoteEnglishProgress(key, !isLearned);
+    await logUserAction(
+      "progress",
+      `${!isLearned ? "Выучил" : "Убрал из выученных"} English word: ${item.word}`
+    );
+
     renderCard();
   });
 
-  $("resetBtn").addEventListener("click", () => {
+  $("resetBtn").addEventListener("click", async () => {
     if (!confirm("Сбросить локальный прогресс English?")) return;
 
     learned.clear();
     saveLocalEnglishProgress();
+    await logUserAction("progress", "Сбросил локальный прогресс English");
     renderCard();
   });
 
@@ -799,6 +826,7 @@ function setupEnglishTrainer() {
     $("englishTestBox").classList.add("hidden");
     $("englishListBox").classList.toggle("hidden");
     renderEnglishAllWordsList();
+    logUserAction("english", "Открыл список всех English слов");
   });
 
   $("englishCloseListBtn").addEventListener("click", () => {
@@ -807,6 +835,7 @@ function setupEnglishTrainer() {
 
   $("englishTestBtn").addEventListener("click", () => {
     startEnglishTest();
+    logUserAction("test", "Начал English test");
   });
 
   $("englishCloseTestBtn").addEventListener("click", () => {
@@ -1172,23 +1201,28 @@ function setupChineseTrainer() {
     renderChineseCard();
   });
 
- $("chLearnedBtn").addEventListener("click", async () => {
-  if (filteredChineseWords.length === 0) return;
+  $("chLearnedBtn").addEventListener("click", async () => {
+    if (filteredChineseWords.length === 0) return;
 
-  const item = getCurrentChineseWord();
-  const key = makeChineseLearnedKey(item);
-  const isLearned = learnedChinese.has(key);
+    const item = getCurrentChineseWord();
+    const key = makeChineseLearnedKey(item);
+    const isLearned = learnedChinese.has(key);
 
-  if (isLearned) {
-    learnedChinese.delete(key);
-  } else {
-    learnedChinese.add(key);
-  }
+    if (isLearned) {
+      learnedChinese.delete(key);
+    } else {
+      learnedChinese.add(key);
+    }
 
-  saveChineseProgress();
-  await saveRemoteChineseProgress(key, !isLearned);
-  renderChineseCard();
-});
+    saveChineseProgress();
+    await saveRemoteChineseProgress(key, !isLearned);
+    await logUserAction(
+      "progress",
+      `${!isLearned ? "Выучил" : "Убрал из выученных"} Chinese word: ${item.hanzi}`
+    );
+
+    renderChineseCard();
+  });
 
   document.querySelectorAll(".ch-mode-btn[data-ch-mode]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1227,6 +1261,7 @@ function setupChineseTrainer() {
     $("chineseTestBox").classList.add("hidden");
     $("chineseListBox").classList.toggle("hidden");
     renderChineseAllWordsList();
+    logUserAction("chinese", "Открыл список всех Chinese слов");
   });
 
   $("chCloseListBtn").addEventListener("click", () => {
@@ -1235,6 +1270,7 @@ function setupChineseTrainer() {
 
   $("chTestBtn").addEventListener("click", () => {
     startChineseTest();
+    logUserAction("test", "Начал Chinese test");
   });
 
   $("chCloseTestBtn").addEventListener("click", () => {
@@ -1282,6 +1318,7 @@ function setupSettings() {
           accent_color: color,
         };
 
+        await logUserAction("settings", `Изменил настройки: theme=${theme}, color=${color}`);
         setMessage("suggestionMessage", "Настройки сохранены.");
       }
     }
@@ -1310,6 +1347,7 @@ function setupSettings() {
       setMessage("suggestionMessage", "Ошибка отправки: " + error.message, true);
     } else {
       $("suggestionText").value = "";
+      await logUserAction("suggestion", "Пользователь отправил пожелание админу");
       setMessage("suggestionMessage", "Пожелание отправлено админу 💌");
     }
   });
@@ -1320,31 +1358,38 @@ function setupSettings() {
 function setupAdminTabs() {
   const suggestionsTab = $("adminSuggestionsTab");
   const usersTab = $("adminUsersTab");
+  const actionsTab = $("adminActionsTab");
 
-  if (!suggestionsTab || !usersTab) return;
+  if (!suggestionsTab || !usersTab || !actionsTab) return;
 
   suggestionsTab.addEventListener("click", async () => {
-    suggestionsTab.classList.add("active");
-    usersTab.classList.remove("active");
-
-    $("adminSuggestionsBox").classList.remove("hidden");
-    $("adminUsersBox").classList.add("hidden");
-
+    setAdminTab("suggestions");
     await loadSuggestionsForAdmin();
   });
 
   usersTab.addEventListener("click", async () => {
-    usersTab.classList.add("active");
-    suggestionsTab.classList.remove("active");
-
-    $("adminUsersBox").classList.remove("hidden");
-    $("adminSuggestionsBox").classList.add("hidden");
-
+    setAdminTab("users");
     await loadUsersForAdmin();
+  });
+
+  actionsTab.addEventListener("click", async () => {
+    setAdminTab("actions");
+    await loadActionsForAdmin();
   });
 
   $("refreshSuggestionsBtn").addEventListener("click", loadSuggestionsForAdmin);
   $("refreshUsersBtn").addEventListener("click", loadUsersForAdmin);
+  $("refreshActionsBtn").addEventListener("click", loadActionsForAdmin);
+}
+
+function setAdminTab(tab) {
+  $("adminSuggestionsTab").classList.toggle("active", tab === "suggestions");
+  $("adminUsersTab").classList.toggle("active", tab === "users");
+  $("adminActionsTab").classList.toggle("active", tab === "actions");
+
+  $("adminSuggestionsBox").classList.toggle("hidden", tab !== "suggestions");
+  $("adminUsersBox").classList.toggle("hidden", tab !== "users");
+  $("adminActionsBox").classList.toggle("hidden", tab !== "actions");
 }
 
 async function loadSuggestionsForAdmin() {
@@ -1405,15 +1450,13 @@ async function loadSuggestionsForAdmin() {
 
   document.querySelectorAll("[data-done-id]").forEach((button) => {
     button.addEventListener("click", async () => {
-      const id = button.dataset.doneId;
-      await markSuggestionDone(id);
+      await markSuggestionDone(button.dataset.doneId);
     });
   });
 
   document.querySelectorAll("[data-delete-id]").forEach((button) => {
     button.addEventListener("click", async () => {
-      const id = button.dataset.deleteId;
-      await deleteSuggestion(id);
+      await deleteSuggestion(button.dataset.deleteId);
     });
   });
 }
@@ -1431,6 +1474,7 @@ async function markSuggestionDone(id) {
     return;
   }
 
+  await logUserAction("admin", "Админ отметил пожелание как выполненное");
   await loadSuggestionsForAdmin();
 }
 
@@ -1450,6 +1494,7 @@ async function deleteSuggestion(id) {
     return;
   }
 
+  await logUserAction("admin", "Админ удалил пожелание");
   await loadSuggestionsForAdmin();
 }
 
@@ -1517,6 +1562,85 @@ async function loadUsersForAdmin() {
               <b>${user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</b>
             </div>
           </div>
+
+          <div class="admin-actions one">
+            <button class="small-btn reset-btn" data-reset-email="${escapeHtml(user.email || "")}">
+              🔑 Сбросить пароль
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  document.querySelectorAll("[data-reset-email]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const email = button.dataset.resetEmail;
+      await sendPasswordReset(email);
+    });
+  });
+}
+
+async function sendPasswordReset(email) {
+  if (!email) {
+    alert("Email пользователя не найден.");
+    return;
+  }
+
+  const ok = confirm(`Отправить письмо для сброса пароля на ${email}?`);
+  if (!ok) return;
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin,
+  });
+
+  if (error) {
+    alert("Ошибка: " + error.message);
+    return;
+  }
+
+  await logUserAction("admin", `Админ отправил сброс пароля для ${email}`);
+  alert("Письмо для сброса пароля отправлено.");
+}
+
+async function loadActionsForAdmin() {
+  const container = $("actionsList");
+
+  if (!supabaseClient || !profile?.is_admin) {
+    container.textContent = "Нет доступа.";
+    return;
+  }
+
+  container.textContent = "Загрузка...";
+
+  const { data, error } = await supabaseClient
+    .from("user_actions")
+    .select("id, user_email, action_type, action_text, created_at")
+    .order("created_at", { ascending: false })
+    .limit(150);
+
+  if (error) {
+    container.textContent = "Ошибка загрузки действий: " + error.message;
+    return;
+  }
+
+  if (!data || !data.length) {
+    container.textContent = "Действий пока нет.";
+    return;
+  }
+
+  container.innerHTML = data
+    .map((item) => {
+      return `
+        <div class="admin-item">
+          <div class="admin-item-top">
+            <strong>${escapeHtml(item.user_email || "unknown")}</strong>
+            <span class="status-badge">${escapeHtml(item.action_type)}</span>
+          </div>
+
+          <p>${escapeHtml(item.action_text)}</p>
+
+          <small>${new Date(item.created_at).toLocaleString()}</small>
         </div>
       `;
     })

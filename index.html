@@ -116,7 +116,7 @@
         <section class="menu-actions">
           <button class="secondary full" id="profileOpenBtn">👤 Мой профиль</button>
           <button class="secondary full" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
-          <button class="secondary full hidden" id="adminOpenBtn">📩 Админ: пожелания</button>
+          <button class="secondary full hidden" id="adminOpenBtn">📩 Админ-панель</button>
         </section>
       </section>
 
@@ -487,41 +487,51 @@
         </div>
       </section>
 
-     <section class="screen" id="adminScreen">
-  <button class="back-btn" data-back-screen="settingsScreen">← Назад к настройкам</button>
+      <section class="screen" id="adminScreen">
+        <button class="back-btn" data-back-screen="settingsScreen">← Назад к настройкам</button>
 
-  <header class="top">
-    <div>
-      <p class="eyebrow">Admin panel</p>
-      <h1>Админ</h1>
-    </div>
+        <header class="top">
+          <div>
+            <p class="eyebrow">Admin panel</p>
+            <h1>Админ</h1>
+          </div>
 
-    <button class="icon-btn" data-back-home title="Назад">⌂</button>
-  </header>
+          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+        </header>
 
-  <section class="admin-tabs">
-    <button class="admin-tab-btn active" id="adminSuggestionsTab">📩 Пожелания</button>
-    <button class="admin-tab-btn" id="adminUsersTab">👥 Пользователи</button>
-  </section>
+        <section class="admin-tabs">
+          <button class="admin-tab-btn active" id="adminSuggestionsTab">📩 Пожелания</button>
+          <button class="admin-tab-btn" id="adminUsersTab">👥 Пользователи</button>
+          <button class="admin-tab-btn" id="adminActionsTab">📊 Действия</button>
+        </section>
 
-  <section class="admin-box" id="adminSuggestionsBox">
-    <div class="list-head">
-      <h2>Пожелания</h2>
-      <button class="small-btn" id="refreshSuggestionsBtn">Обновить</button>
-    </div>
+        <section class="admin-box" id="adminSuggestionsBox">
+          <div class="list-head">
+            <h2>Пожелания</h2>
+            <button class="small-btn" id="refreshSuggestionsBtn">Обновить</button>
+          </div>
 
-    <div id="suggestionsList">Загрузка...</div>
-  </section>
+          <div id="suggestionsList">Загрузка...</div>
+        </section>
 
-  <section class="admin-box hidden" id="adminUsersBox">
-    <div class="list-head">
-      <h2>Пользователи</h2>
-      <button class="small-btn" id="refreshUsersBtn">Обновить</button>
-    </div>
+        <section class="admin-box hidden" id="adminUsersBox">
+          <div class="list-head">
+            <h2>Пользователи</h2>
+            <button class="small-btn" id="refreshUsersBtn">Обновить</button>
+          </div>
 
-    <div id="usersList">Загрузка...</div>
-  </section>
-</section>
+          <div id="usersList">Загрузка...</div>
+        </section>
+
+        <section class="admin-box hidden" id="adminActionsBox">
+          <div class="list-head">
+            <h2>Действия пользователей</h2>
+            <button class="small-btn" id="refreshActionsBtn">Обновить</button>
+          </div>
+
+          <div id="actionsList">Загрузка...</div>
+        </section>
+      </section>
 
       <footer>
         <p>Автор Боташка Красотка Балапашка</p>
