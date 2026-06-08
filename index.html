@@ -13,11 +13,84 @@
   <div class="phone-bg">
     <main class="app">
 
-      <section class="screen active" id="welcomeScreen">
+      <section class="screen active" id="authScreen">
+        <div class="brand-card">
+          <p class="eyebrow">Botashki 2026</p>
+          <h1>Сайт Боташки</h1>
+          <p class="subtitle">Вход по номеру телефона и паролю.</p>
+        </div>
+
+        <div class="tabs auth-tabs">
+          <button class="tab-btn active" data-auth-tab="login">Вход</button>
+          <button class="tab-btn" data-auth-tab="register">Регистрация</button>
+          <button class="tab-btn" data-auth-tab="reset">Сброс</button>
+        </div>
+
+        <form class="auth-form active" id="loginForm">
+          <label>
+            Телефон
+            <input id="loginPhone" type="tel" placeholder="+77001234567" required />
+          </label>
+
+          <label>
+            Пароль
+            <input id="loginPassword" type="password" placeholder="Пароль" required />
+          </label>
+
+          <button class="primary full" type="submit">Войти</button>
+        </form>
+
+        <form class="auth-form" id="registerForm">
+          <label>
+            Имя
+            <input id="registerName" type="text" placeholder="Ваше имя" required />
+          </label>
+
+          <label>
+            Телефон
+            <input id="registerPhone" type="tel" placeholder="+77001234567" required />
+          </label>
+
+          <label>
+            Пароль
+            <input id="registerPassword" type="password" placeholder="Минимум 4 символа" minlength="4" required />
+          </label>
+
+          <label>
+            Кодовое слово
+            <input id="registerRecoveryWord" type="text" placeholder="Запомни это слово" required />
+          </label>
+
+          <button class="primary full" type="submit">Создать аккаунт</button>
+        </form>
+
+        <form class="auth-form" id="resetForm">
+          <label>
+            Телефон
+            <input id="resetPhone" type="tel" placeholder="+77001234567" required />
+          </label>
+
+          <label>
+            Кодовое слово
+            <input id="resetRecoveryWord" type="text" placeholder="Ваше кодовое слово" required />
+          </label>
+
+          <label>
+            Новый пароль
+            <input id="resetNewPassword" type="password" placeholder="Новый пароль" minlength="4" required />
+          </label>
+
+          <button class="primary full" type="submit">Сбросить пароль</button>
+        </form>
+
+        <p class="message" id="authMessage"></p>
+      </section>
+
+      <section class="screen" id="welcomeScreen">
         <div class="welcome-box">
           <div class="sparkle">✨</div>
-          <h1>Сайт Боташки</h1>
-          <h2>Добро пожаловать</h2>
+          <h1>Добро пожаловать</h1>
+          <h2 id="welcomeName">на сайт Боташки</h2>
           <p>English + Chinese courses</p>
           <button class="primary full" id="startBtn">Начать обучение</button>
         </div>
@@ -26,9 +99,11 @@
       <section class="screen" id="homeScreen">
         <header class="top">
           <div>
-            <p class="eyebrow">Botashki 2026</p>
+            <p class="eyebrow" id="userLine">Botashki 2026</p>
             <h1>Курсы</h1>
           </div>
+
+          <button class="icon-btn" id="logoutBtn" title="Выйти">⇥</button>
         </header>
 
         <section class="course-grid">
@@ -357,7 +432,6 @@
           <h2>Пожелания админу</h2>
           <p class="subtitle">Напиши идею, ошибку или пожелание по улучшению сайта.</p>
 
-          <input id="suggestionName" type="text" placeholder="Ваше имя" />
           <textarea id="suggestionText" rows="5" placeholder="Например: добавьте тесты по UNIT-4..."></textarea>
 
           <button class="primary full" id="sendSuggestionBtn">Отправить админу</button>

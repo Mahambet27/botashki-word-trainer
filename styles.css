@@ -7,12 +7,12 @@
   --bg: #eef4ff;
   --dark: #111827;
   --muted: #667085;
-  --card: rgba(255, 255, 255, 0.9);
+  --card: rgba(255, 255, 255, 0.92);
   --card-solid: #ffffff;
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
   --soft: #e8efff;
-  --border: rgba(148, 163, 184, 0.28);
+  --border: rgba(148, 163, 184, 0.3);
   --success: #16a34a;
   --danger: #dc2626;
   --shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
@@ -22,10 +22,10 @@ body.theme-dark {
   --bg: #0b1220;
   --dark: #f8fafc;
   --muted: #cbd5e1;
-  --card: rgba(15, 23, 42, 0.88);
+  --card: rgba(15, 23, 42, 0.9);
   --card-solid: #111827;
   --soft: #1f2937;
-  --border: rgba(148, 163, 184, 0.25);
+  --border: rgba(148, 163, 184, 0.28);
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
 }
 
@@ -172,6 +172,11 @@ h2 {
   backdrop-filter: blur(18px);
 }
 
+.brand-card {
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+
 .welcome-box {
   min-height: 78vh;
   display: grid;
@@ -225,6 +230,10 @@ h2 {
   box-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
 }
 
+.auth-tabs {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .english-tools,
 .chinese-tools {
   grid-template-columns: 1fr 1fr;
@@ -248,6 +257,20 @@ h2 {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   box-shadow: 0 12px 22px rgba(37, 99, 235, 0.24);
+}
+
+.auth-form {
+  display: none;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.auth-form.active {
+  display: grid;
 }
 
 label {
@@ -833,6 +856,10 @@ footer {
   .settings-row,
   .english-tools,
   .chinese-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-tabs {
     grid-template-columns: 1fr;
   }
 

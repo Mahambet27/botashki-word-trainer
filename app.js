@@ -12,6 +12,8 @@ const supabaseClient = hasSupabaseConfig
   ? window.supabase.createClient(config.url, config.anonKey)
   : null;
 
+let appUser = JSON.parse(localStorage.getItem("botashkiUser") || "null");
+
 let mode = "order";
 let currentUnit = "ALL";
 let filteredWords = [...WORDS];
@@ -64,6 +66,32 @@ function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
 
+function saveUser(user) {
+  appUser = user;
+  localStorage.setItem("botashkiUser", JSON.stringify(user));
+  renderUserLine();
+}
+
+function clearUser() {
+  appUser = null;
+  localStorage.removeItem("botashkiUser");
+  renderUserLine();
+}
+
+function renderUserLine() {
+  if ($("userLine")) {
+    $("userLine").textContent = appUser
+      ? `${appUser.name} · ${appUser.phone}`
+      : "Botashki 2026";
+  }
+
+  if ($("welcomeName")) {
+    $("welcomeName").textContent = appUser
+      ? `${appUser.name}, добро пожаловать!`
+      : "на сайт Боташки";
+  }
+}
+
 /* THEME */
 
 function getSavedSettings() {
@@ -92,11 +120,146 @@ function applyTheme(theme, color) {
   if ($("colorSelect")) $("colorSelect").value = color;
 }
 
+/* AUTH */
+
+function setupAuth() {
+  document.querySelectorAll("[data-auth-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.authTab;
+
+      document.querySelectorAll("[data-auth-tab]").forEach((btn) => {
+        btn.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      $("loginForm").classList.toggle("active", tab === "login");
+      $("registerForm").classList.toggle("active", tab === "register");
+      $("resetForm").classList.toggle("active", tab === "reset");
+
+      setMessage("authMessage", "");
+    });
+  });
+
+  $("loginForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient) {
+      setMessage("authMessage", "Supabase не подключен.", true);
+      return;
+    }
+
+    const phone = $("loginPhone").value.trim();
+    const password = $("loginPassword").value;
+
+    const { data, error } = await supabaseClient.rpc("login_app_user", {
+      p_phone: phone,
+      p_password: password,
+    });
+
+    if (error) {
+      setMessage("authMessage", "Ошибка входа: " + error.message, true);
+      return;
+    }
+
+    if (!data || !data.success) {
+      setMessage("authMessage", data?.message || "Ошибка входа", true);
+      return;
+    }
+
+    saveUser(data.user);
+    setMessage("authMessage", "Успешно! Вы вошли.");
+
+    setTimeout(() => {
+      showScreen("welcomeScreen");
+    }, 900);
+  });
+
+  $("registerForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient) {
+      setMessage("authMessage", "Supabase не подключен.", true);
+      return;
+    }
+
+    const name = $("registerName").value.trim();
+    const phone = $("registerPhone").value.trim();
+    const password = $("registerPassword").value;
+    const recoveryWord = $("registerRecoveryWord").value.trim();
+
+    const { data, error } = await supabaseClient.rpc("register_app_user", {
+      p_phone: phone,
+      p_name: name,
+      p_password: password,
+      p_recovery_word: recoveryWord,
+    });
+
+    if (error) {
+      setMessage("authMessage", "Ошибка регистрации: " + error.message, true);
+      return;
+    }
+
+    if (!data || !data.success) {
+      setMessage("authMessage", data?.message || "Ошибка регистрации", true);
+      return;
+    }
+
+    saveUser(data.user);
+    setMessage("authMessage", "Успешно! Аккаунт создан.");
+
+    setTimeout(() => {
+      showScreen("welcomeScreen");
+    }, 900);
+  });
+
+  $("resetForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient) {
+      setMessage("authMessage", "Supabase не подключен.", true);
+      return;
+    }
+
+    const phone = $("resetPhone").value.trim();
+    const recoveryWord = $("resetRecoveryWord").value.trim();
+    const newPassword = $("resetNewPassword").value;
+
+    const { data, error } = await supabaseClient.rpc("reset_app_password", {
+      p_phone: phone,
+      p_recovery_word: recoveryWord,
+      p_new_password: newPassword,
+    });
+
+    if (error) {
+      setMessage("authMessage", "Ошибка сброса: " + error.message, true);
+      return;
+    }
+
+    if (!data || !data.success) {
+      setMessage("authMessage", data?.message || "Ошибка сброса", true);
+      return;
+    }
+
+    $("resetForm").reset();
+    setMessage("authMessage", "Успешно! Пароль обновлен. Теперь войдите.");
+
+    setTimeout(() => {
+      document.querySelector('[data-auth-tab="login"]').click();
+    }, 900);
+  });
+}
+
 /* NAVIGATION */
 
 function setupNavigation() {
   $("startBtn").addEventListener("click", () => {
     showScreen("homeScreen");
+  });
+
+  $("logoutBtn").addEventListener("click", () => {
+    clearUser();
+    showScreen("authScreen");
   });
 
   document.querySelectorAll("[data-course]").forEach((button) => {
@@ -934,7 +1097,7 @@ function setupChineseTrainer() {
   });
 }
 
-/* SETTINGS + SUGGESTIONS */
+/* SETTINGS */
 
 function setupSettings() {
   const settings = getSavedSettings();
@@ -949,7 +1112,6 @@ function setupSettings() {
   });
 
   $("sendSuggestionBtn").addEventListener("click", async () => {
-    const name = $("suggestionName").value.trim() || "Гость";
     const message = $("suggestionText").value.trim();
 
     if (!message) {
@@ -962,8 +1124,10 @@ function setupSettings() {
       return;
     }
 
+    const sender = appUser ? `${appUser.name} (${appUser.phone})` : "Гость";
+
     const { error } = await supabaseClient.from("suggestions").insert({
-      user_email: name,
+      user_email: sender,
       message,
       status: "new",
     });
@@ -983,22 +1147,30 @@ function boot() {
   const settings = getSavedSettings();
   applyTheme(settings.theme, settings.color);
 
+  renderUserLine();
+
+  setupAuth();
   setupNavigation();
 
   fillUnitSelect();
   updateFilteredWords();
   fillWordSelect();
   renderCard();
-
   setupEnglishTrainer();
 
   fillChineseUnitSelect();
   updateFilteredChineseWords();
   fillChineseWordSelect();
   renderChineseCard();
-
   setupChineseTrainer();
+
   setupSettings();
+
+  if (appUser) {
+    showScreen("homeScreen");
+  } else {
+    showScreen("authScreen");
+  }
 }
 
 boot();
