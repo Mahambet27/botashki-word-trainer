@@ -975,6 +975,14 @@ function showNoChineseWords() {
   $("chTotalNumber").textContent = "0";
   $("chLearnedNumber").textContent = "0";
   $("chProgressLine").style.width = "0%";
+
+  if ($("chineseDetails")) {
+    $("chineseDetails").classList.add("hidden");
+  }
+
+  if ($("chTapText")) {
+    $("chTapText").textContent = "Tap card";
+  }
 }
 
 function getCurrentChineseWord() {
@@ -1019,6 +1027,14 @@ function renderChineseCard() {
 
   if ($("chWordSelect")) {
     $("chWordSelect").value = chineseIndex;
+  }
+
+  if ($("chineseDetails")) {
+    $("chineseDetails").classList.add("hidden");
+  }
+
+  if ($("chTapText")) {
+    $("chTapText").textContent = "Tap card";
   }
 
   renderChineseAllWordsList();
@@ -1182,6 +1198,21 @@ function nextChineseTestQuestion() {
 }
 
 function setupChineseTrainer() {
+  $("chineseCard").addEventListener("click", (event) => {
+    if (
+      event.target.closest("button") ||
+      event.target.closest("select") ||
+      event.target.closest("input")
+    ) {
+      return;
+    }
+
+    $("chineseDetails").classList.toggle("hidden");
+
+    const isOpen = !$("chineseDetails").classList.contains("hidden");
+    $("chTapText").textContent = isOpen ? "Hide translation" : "Tap card";
+  });
+
   fillChineseUnitSelect();
   updateFilteredChineseWords();
   fillChineseWordSelect();
