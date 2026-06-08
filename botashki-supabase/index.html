@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Боташки | Word Trainer</title>
+  <meta name="description" content="Сайт Боташки для изучения английского и китайского языка." />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="phone-bg">
+    <main class="app">
+
+      <section class="screen active" id="authScreen">
+        <div class="brand-card">
+          <p class="eyebrow">Botashki 2026</p>
+          <h1>Сайт Боташки</h1>
+          <p class="subtitle">Вход, регистрация и тренировка слов по курсам.</p>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" data-auth-tab="login">Вход</button>
+          <button class="tab-btn" data-auth-tab="register">Регистрация</button>
+        </div>
+
+        <form class="auth-form active" id="loginForm">
+          <label>
+            Email
+            <input id="loginEmail" type="email" placeholder="example@mail.com" required />
+          </label>
+
+          <label>
+            Пароль
+            <input id="loginPassword" type="password" placeholder="Пароль" required />
+          </label>
+
+          <button class="primary full" type="submit">Войти</button>
+        </form>
+
+        <form class="auth-form" id="registerForm">
+          <label>
+            Имя
+            <input id="registerName" type="text" placeholder="Ваше имя" required />
+          </label>
+
+          <label>
+            Email
+            <input id="registerEmail" type="email" placeholder="example@mail.com" required />
+          </label>
+
+          <label>
+            Пароль
+            <input id="registerPassword" type="password" placeholder="Минимум 6 символов" minlength="6" required />
+          </label>
+
+          <button class="primary full" type="submit">Создать аккаунт</button>
+        </form>
+
+        <p class="message" id="authMessage"></p>
+      </section>
+
+      <section class="screen" id="yearScreen">
+        <button class="back-btn" data-back-screen="authScreen">← Назад</button>
+
+        <div class="center-card">
+          <p class="eyebrow">Step 1</p>
+          <h2>Выбери учебный год</h2>
+          <p class="subtitle">После выбора откроется приветственная анимация.</p>
+
+          <select id="yearSelect" class="big-select">
+            <option value="2026">2026 год</option>
+            <option value="2027">2027 год</option>
+            <option value="2028">2028 год</option>
+          </select>
+
+          <button class="primary full" id="yearBtn">Продолжить</button>
+        </div>
+      </section>
+
+      <section class="screen" id="welcomeScreen">
+        <div class="welcome-box">
+          <div class="sparkle">✨</div>
+          <h2>Добро пожаловать<br />на сайт Боташки</h2>
+          <p>English + Chinese courses</p>
+        </div>
+      </section>
+
+      <section class="screen" id="homeScreen">
+        <button class="back-btn" data-back-screen="yearScreen">← Назад к году</button>
+
+        <header class="top">
+          <div>
+            <p class="eyebrow" id="userLine">Botashki</p>
+            <h1>Курсы</h1>
+          </div>
+
+          <button class="icon-btn" id="logoutBtn" title="Выйти">⇥</button>
+        </header>
+
+        <section class="course-grid">
+          <button class="course-card english" data-course="english">
+            <span>🇬🇧</span>
+            <strong>Английский</strong>
+            <small>Cards, search, all words, random, test</small>
+          </button>
+
+          <button class="course-card chinese" data-course="chinese">
+            <span>🇨🇳</span>
+            <strong>Китайский</strong>
+            <small>Hanzi, pinyin, search, random, test</small>
+          </button>
+        </section>
+
+        <section class="menu-actions">
+          <button class="secondary full" id="profileOpenBtn">👤 Мой профиль</button>
+          <button class="secondary full" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
+          <button class="secondary full hidden" id="adminOpenBtn">📩 Админ: пожелания</button>
+        </section>
+      </section>
+
+      <section class="screen" id="profileScreen">
+        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+
+        <header class="top">
+          <div>
+            <p class="eyebrow">Profile</p>
+            <h1>Мой профиль</h1>
+          </div>
+
+          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+        </header>
+
+        <section class="profile-card">
+          <div class="avatar-circle" id="profileAvatar">B</div>
+          <h2 id="profileName">Botashki</h2>
+          <p id="profileEmail" class="subtitle">email</p>
+        </section>
+
+        <section class="profile-info-grid">
+          <div class="profile-info">
+            <small>Учебный год</small>
+            <strong id="profileYear">2026</strong>
+          </div>
+
+          <div class="profile-info">
+            <small>Дата регистрации</small>
+            <strong id="profileCreated">—</strong>
+          </div>
+
+          <div class="profile-info">
+            <small>Тема</small>
+            <strong id="profileTheme">light</strong>
+          </div>
+
+          <div class="profile-info">
+            <small>Цвет</small>
+            <strong id="profileColor">blue</strong>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Статистика обучения</h2>
+
+          <div class="course-progress-card">
+            <div>
+              <strong>English</strong>
+              <p id="profileEnglishText">0 / 0 words</p>
+            </div>
+            <span id="profileEnglishPercent">0%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div id="profileEnglishLine"></div>
+          </div>
+
+          <div class="course-progress-card">
+            <div>
+              <strong>Chinese</strong>
+              <p id="profileChineseText">0 / 0 words</p>
+            </div>
+            <span id="profileChinesePercent">0%</span>
+          </div>
+
+          <div class="progress-bar">
+            <div id="profileChineseLine"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="screen" id="englishScreen">
+        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+
+        <header class="top">
+          <div>
+            <p class="eyebrow">English Vocabulary</p>
+            <h1>Word Trainer</h1>
+          </div>
+
+          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+        </header>
+
+        <section class="stats">
+          <div class="stat">
+            <span id="currentNumber">1</span>
+            <small>current</small>
+          </div>
+
+          <div class="stat">
+            <span id="totalNumber">0</span>
+            <small>words</small>
+          </div>
+
+          <div class="stat">
+            <span id="learnedNumber">0</span>
+            <small>learned</small>
+          </div>
+        </section>
+
+        <section class="filters">
+          <label>
+            Unit
+            <select id="unitSelect"></select>
+          </label>
+
+          <label>
+            Word
+            <select id="wordSelect"></select>
+          </label>
+
+          <label class="search-label">
+            Search word
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search: CPR, springing up, pose..."
+              autocomplete="off"
+            />
+          </label>
+        </section>
+
+        <section class="settings-row english-tools">
+          <button class="mode-btn active" data-mode="order">По порядку</button>
+          <button class="mode-btn" data-mode="random">Random</button>
+          <button class="mode-btn" id="englishAllWordsBtn">Все слова</button>
+          <button class="mode-btn" id="englishTestBtn">Тест</button>
+          <button class="mode-btn" id="resetBtn">Reset</button>
+        </section>
+
+        <section class="word-list-box hidden" id="englishListBox">
+          <div class="list-head">
+            <h2>Все English слова</h2>
+            <button class="small-btn" id="englishCloseListBtn">Закрыть</button>
+          </div>
+
+          <div id="englishAllWordsList"></div>
+        </section>
+
+        <section class="test-box hidden" id="englishTestBox">
+          <div class="list-head">
+            <h2>English test</h2>
+            <button class="small-btn" id="englishCloseTestBtn">Закрыть</button>
+          </div>
+
+          <p class="subtitle" id="englishTestCounter">Question 1/10</p>
+
+          <div class="test-question english-question">
+            <h2 id="englishTestWord">springing up</h2>
+            <p>Choose the meaning</p>
+          </div>
+
+          <div class="test-options" id="englishTestOptions"></div>
+
+          <p class="message" id="englishTestMessage"></p>
+
+          <button class="primary full hidden" id="englishNextTestBtn">Следующий вопрос</button>
+        </section>
+
+        <section class="card-zone">
+          <div class="flip-card" id="card">
+            <div class="card-inner">
+              <article class="card-face card-front">
+                <p class="hint">Нажми, чтобы открыть перевод</p>
+                <p class="unit-label" id="unitLabel">UNIT-1</p>
+                <h2 id="word">springing up</h2>
+                <p class="tap-text">Tap card</p>
+              </article>
+
+              <article class="card-face card-back">
+                <p class="unit-label back-unit" id="backUnitLabel">UNIT-1</p>
+                <h2 id="backWord">springing up</h2>
+
+                <div class="details">
+                  <div class="detail-box">
+                    <strong>Meaning</strong>
+                    <p id="meaning"></p>
+                  </div>
+
+                  <div class="detail-box">
+                    <strong>Example</strong>
+                    <p id="example"></p>
+                  </div>
+
+                  <div class="detail-box">
+                    <strong>Russian</strong>
+                    <p id="russian"></p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="actions">
+          <button class="secondary" id="prevBtn">← Назад</button>
+          <button class="primary" id="learnedBtn">Выучила</button>
+          <button class="secondary" id="nextBtn">Дальше →</button>
+        </section>
+
+        <section class="progress-bar">
+          <div id="progressLine"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="chineseScreen">
+        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+
+        <header class="top">
+          <div>
+            <p class="eyebrow">Chinese Vocabulary</p>
+            <h1>Китайский</h1>
+          </div>
+
+          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+        </header>
+
+        <section class="stats">
+          <div class="stat">
+            <span id="chCurrentNumber">1</span>
+            <small>current</small>
+          </div>
+
+          <div class="stat">
+            <span id="chTotalNumber">0</span>
+            <small>words</small>
+          </div>
+
+          <div class="stat">
+            <span id="chLearnedNumber">0</span>
+            <small>learned</small>
+          </div>
+        </section>
+
+        <section class="filters">
+          <label>
+            Unit
+            <select id="chUnitSelect"></select>
+          </label>
+
+          <label>
+            Word
+            <select id="chWordSelect"></select>
+          </label>
+
+          <label class="search-label">
+            Search Chinese word
+            <input
+              type="text"
+              id="chSearchInput"
+              placeholder="Search: 电话, diànhuà, phone..."
+              autocomplete="off"
+            />
+          </label>
+        </section>
+
+        <section class="settings-row chinese-tools">
+          <button class="ch-mode-btn active" data-ch-mode="order">По порядку</button>
+          <button class="ch-mode-btn" data-ch-mode="random">Random</button>
+          <button class="ch-mode-btn" id="chAllWordsBtn">Все слова</button>
+          <button class="ch-mode-btn" id="chTestBtn">Тест</button>
+        </section>
+
+        <section class="word-list-box hidden" id="chineseListBox">
+          <div class="list-head">
+            <h2>Все Chinese слова</h2>
+            <button class="small-btn" id="chCloseListBtn">Закрыть</button>
+          </div>
+
+          <div id="chineseAllWordsList"></div>
+        </section>
+
+        <section class="test-box hidden" id="chineseTestBox">
+          <div class="list-head">
+            <h2>Китайский тест</h2>
+            <button class="small-btn" id="chCloseTestBtn">Закрыть</button>
+          </div>
+
+          <p class="subtitle" id="chTestCounter">Вопрос 1/10</p>
+
+          <div class="test-question">
+            <h2 id="chTestHanzi">电话</h2>
+            <p id="chTestPinyin">diànhuà</p>
+          </div>
+
+          <div class="test-options" id="chTestOptions"></div>
+
+          <p class="message" id="chTestMessage"></p>
+
+          <button class="primary full hidden" id="chNextTestBtn">Следующий вопрос</button>
+        </section>
+
+        <section class="chinese-card" id="chineseCard">
+          <p class="unit-label" id="chUnit">UNIT-1</p>
+          <h2 id="chHanzi">电话</h2>
+          <p class="pinyin" id="chPinyin">diànhuà</p>
+
+          <div class="detail-box">
+            <strong>Meaning</strong>
+            <p id="chMeaning"></p>
+          </div>
+
+          <div class="detail-box">
+            <strong>Example</strong>
+            <p id="chExample"></p>
+          </div>
+
+          <div class="detail-box">
+            <strong>Russian</strong>
+            <p id="chRussian"></p>
+          </div>
+        </section>
+
+        <section class="actions">
+          <button class="secondary" id="chPrevBtn">← Назад</button>
+          <button class="primary" id="chLearnedBtn">Выучила</button>
+          <button class="secondary" id="chNextBtn">Дальше →</button>
+        </section>
+
+        <section class="progress-bar">
+          <div id="chProgressLine"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="settingsScreen">
+        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+
+        <header class="top">
+          <div>
+            <p class="eyebrow">Settings</p>
+            <h1>Настройки</h1>
+          </div>
+
+          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+        </header>
+
+        <div class="panel">
+          <label>
+            Тема сайта
+            <select id="themeSelect">
+              <option value="light">Светлая</option>
+              <option value="dark">Темная</option>
+            </select>
+          </label>
+
+          <label>
+            Цвет сайта
+            <select id="colorSelect">
+              <option value="blue">Синий</option>
+              <option value="pink">Розовый</option>
+              <option value="purple">Фиолетовый</option>
+              <option value="green">Зеленый</option>
+            </select>
+          </label>
+
+          <button class="primary full" id="saveSettingsBtn">Сохранить настройки</button>
+        </div>
+
+        <div class="panel">
+          <h2>Пожелания админу</h2>
+          <p class="subtitle">Напиши идею, ошибку или пожелание по улучшению сайта.</p>
+
+          <textarea id="suggestionText" rows="5" placeholder="Например: добавьте тесты по UNIT-4..."></textarea>
+
+          <button class="primary full" id="sendSuggestionBtn">Отправить админу</button>
+          <p class="message" id="suggestionMessage"></p>
+        </div>
+      </section>
+
+     <section class="screen" id="adminScreen">
+  <button class="back-btn" data-back-screen="settingsScreen">← Назад к настройкам</button>
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">Admin panel</p>
+      <h1>Админ</h1>
+    </div>
+
+    <button class="icon-btn" data-back-home title="Назад">⌂</button>
+  </header>
+
+  <section class="admin-tabs">
+    <button class="admin-tab-btn active" id="adminSuggestionsTab">📩 Пожелания</button>
+    <button class="admin-tab-btn" id="adminUsersTab">👥 Пользователи</button>
+  </section>
+
+  <section class="admin-box" id="adminSuggestionsBox">
+    <div class="list-head">
+      <h2>Пожелания</h2>
+      <button class="small-btn" id="refreshSuggestionsBtn">Обновить</button>
+    </div>
+
+    <div id="suggestionsList">Загрузка...</div>
+  </section>
+
+  <section class="admin-box hidden" id="adminUsersBox">
+    <div class="list-head">
+      <h2>Пользователи</h2>
+      <button class="small-btn" id="refreshUsersBtn">Обновить</button>
+    </div>
+
+    <div id="usersList">Загрузка...</div>
+  </section>
+</section>
+
+      <footer>
+        <p>Автор Боташка Красотка Балапашка</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="words.js"></script>
+  <script src="chinese.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
