@@ -155,7 +155,6 @@ h2 {
 .center-card,
 .panel,
 .welcome-box,
-.chinese-card,
 .profile-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -180,10 +179,7 @@ h2 {
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
 }
 
-.english-tools {
-  grid-template-columns: 1fr 1fr;
-}
-
+.english-tools,
 .chinese-tools {
   grid-template-columns: 1fr 1fr;
 }
@@ -550,6 +546,54 @@ textarea:focus {
   font-weight: 700;
 }
 
+/* CHINESE FLIP CARD */
+
+.chinese-flip-card {
+  min-height: 430px;
+}
+
+.chinese-flip-card .card-inner {
+  min-height: 430px;
+}
+
+.chinese-front,
+.chinese-back {
+  text-align: center;
+}
+
+.chinese-front h2,
+.chinese-back h2 {
+  font-size: 68px;
+  margin: 12px 0 4px;
+}
+
+.chinese-front .pinyin,
+.chinese-back .pinyin {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0 0 18px;
+}
+
+.chinese-back {
+  text-align: left;
+}
+
+.chinese-back h2,
+.chinese-back .pinyin,
+.chinese-back .unit-label {
+  text-align: center;
+  display: block;
+}
+
+.chinese-back .details {
+  margin-top: 14px;
+}
+
+.chinese-back .detail-box {
+  text-align: left;
+}
+
 .actions {
   display: grid;
   grid-template-columns: 1fr 1.1fr 1fr;
@@ -572,39 +616,6 @@ textarea:focus {
   transition: width 0.25s ease;
 }
 
-.chinese-card {
-  margin-top: 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.chinese-card:hover {
-  transform: translateY(-2px);
-}
-
-.chinese-card h2 {
-  font-size: 68px;
-  margin: 14px 0 4px;
-}
-
-.chinese-details {
-  margin-top: 16px;
-  animation: pageIn 0.25s ease;
-}
-
-.chinese-card .tap-text {
-  margin: 14px auto 0;
-}
-
-.chinese-card .hint {
-  margin-top: 0;
-}
-
-.chinese-card .detail-box {
-  text-align: left;
-}
-
 .pinyin {
   color: var(--primary);
   font-size: 24px;
@@ -616,28 +627,6 @@ textarea:focus {
   margin-bottom: 14px;
   display: grid;
   gap: 13px;
-}
-
-.suggestion-item {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 14px;
-  background: rgba(148, 163, 184, 0.1);
-  margin-bottom: 10px;
-}
-
-.suggestion-item strong {
-  color: var(--primary);
-}
-
-.suggestion-item p {
-  margin: 8px 0;
-  line-height: 1.45;
-}
-
-.suggestion-item small {
-  color: var(--muted);
-  font-weight: 800;
 }
 
 footer {
@@ -1107,6 +1096,11 @@ footer {
 
   .english-question h2 {
     font-size: 30px;
+  }
+
+  .chinese-front h2,
+  .chinese-back h2 {
+    font-size: 54px;
   }
 
   .admin-actions,

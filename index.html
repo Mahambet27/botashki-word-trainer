@@ -109,7 +109,7 @@
           <button class="course-card chinese" data-course="chinese">
             <span>🇨🇳</span>
             <strong>Китайский</strong>
-            <small>Hanzi, pinyin, search, random, test</small>
+            <small>Flip card, Hanzi, pinyin, search, test</small>
           </button>
         </section>
 
@@ -410,29 +410,39 @@
           <button class="primary full hidden" id="chNextTestBtn">Следующий вопрос</button>
         </section>
 
-        <section class="chinese-card" id="chineseCard">
-          <p class="hint">Нажми, чтобы открыть перевод</p>
+        <section class="card-zone">
+          <div class="flip-card chinese-flip-card" id="chineseCard">
+            <div class="card-inner">
+              <article class="card-face card-front chinese-front">
+                <p class="hint">Нажми, чтобы открыть перевод</p>
+                <p class="unit-label" id="chUnit">UNIT-1</p>
+                <h2 id="chHanzi">电话</h2>
+                <p class="pinyin" id="chPinyin">diànhuà</p>
+                <p class="tap-text">Tap card</p>
+              </article>
 
-          <p class="unit-label" id="chUnit">UNIT-1</p>
-          <h2 id="chHanzi">电话</h2>
-          <p class="pinyin" id="chPinyin">diànhuà</p>
+              <article class="card-face card-back chinese-back">
+                <p class="unit-label" id="chBackUnit">UNIT-1</p>
+                <h2 id="chBackHanzi">电话</h2>
+                <p class="pinyin" id="chBackPinyin">diànhuà</p>
 
-          <p class="tap-text" id="chTapText">Tap card</p>
+                <div class="details">
+                  <div class="detail-box">
+                    <strong>Meaning</strong>
+                    <p id="chMeaning"></p>
+                  </div>
 
-          <div class="chinese-details hidden" id="chineseDetails">
-            <div class="detail-box">
-              <strong>Meaning</strong>
-              <p id="chMeaning"></p>
-            </div>
+                  <div class="detail-box">
+                    <strong>Example</strong>
+                    <p id="chExample"></p>
+                  </div>
 
-            <div class="detail-box">
-              <strong>Example</strong>
-              <p id="chExample"></p>
-            </div>
-
-            <div class="detail-box">
-              <strong>Russian</strong>
-              <p id="chRussian"></p>
+                  <div class="detail-box">
+                    <strong>Russian</strong>
+                    <p id="chRussian"></p>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </section>

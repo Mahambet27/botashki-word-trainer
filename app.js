@@ -965,8 +965,14 @@ function fillChineseWordSelect() {
 
 function showNoChineseWords() {
   $("chUnit").textContent = currentChineseUnit === "ALL" ? "ALL UNITS" : currentChineseUnit;
+  $("chBackUnit").textContent = currentChineseUnit === "ALL" ? "ALL UNITS" : currentChineseUnit;
+
   $("chHanzi").textContent = "No word";
+  $("chBackHanzi").textContent = "No word";
+
   $("chPinyin").textContent = "";
+  $("chBackPinyin").textContent = "";
+
   $("chMeaning").textContent = "This word is not found.";
   $("chExample").textContent = "";
   $("chRussian").textContent = "";
@@ -976,13 +982,7 @@ function showNoChineseWords() {
   $("chLearnedNumber").textContent = "0";
   $("chProgressLine").style.width = "0%";
 
-  if ($("chineseDetails")) {
-    $("chineseDetails").classList.add("hidden");
-  }
-
-  if ($("chTapText")) {
-    $("chTapText").textContent = "Tap card";
-  }
+  $("chineseCard").classList.remove("open");
 }
 
 function getCurrentChineseWord() {
@@ -1001,8 +1001,14 @@ function renderChineseCard() {
   const isLearned = learnedChinese.has(key);
 
   $("chUnit").textContent = item.unit || "UNIT-1";
+  $("chBackUnit").textContent = item.unit || "UNIT-1";
+
   $("chHanzi").textContent = item.hanzi || "";
+  $("chBackHanzi").textContent = item.hanzi || "";
+
   $("chPinyin").textContent = item.pinyin || "";
+  $("chBackPinyin").textContent = item.pinyin || "";
+
   $("chMeaning").textContent = item.meaning || "";
   $("chExample").textContent = item.example || "";
   $("chRussian").textContent = item.russian || "";
@@ -1029,13 +1035,7 @@ function renderChineseCard() {
     $("chWordSelect").value = chineseIndex;
   }
 
-  if ($("chineseDetails")) {
-    $("chineseDetails").classList.add("hidden");
-  }
-
-  if ($("chTapText")) {
-    $("chTapText").textContent = "Tap card";
-  }
+  $("chineseCard").classList.remove("open");
 
   renderChineseAllWordsList();
   renderProfile();
@@ -1198,19 +1198,8 @@ function nextChineseTestQuestion() {
 }
 
 function setupChineseTrainer() {
-  $("chineseCard").addEventListener("click", (event) => {
-    if (
-      event.target.closest("button") ||
-      event.target.closest("select") ||
-      event.target.closest("input")
-    ) {
-      return;
-    }
-
-    $("chineseDetails").classList.toggle("hidden");
-
-    const isOpen = !$("chineseDetails").classList.contains("hidden");
-    $("chTapText").textContent = isOpen ? "Hide translation" : "Tap card";
+  $("chineseCard").addEventListener("click", () => {
+    $("chineseCard").classList.toggle("open");
   });
 
   fillChineseUnitSelect();
