@@ -13,90 +13,22 @@
   <div class="phone-bg">
     <main class="app">
 
-      <section class="screen active" id="authScreen">
-        <div class="brand-card">
-          <p class="eyebrow">Botashki 2026</p>
-          <h1>Сайт Боташки</h1>
-          <p class="subtitle">Вход, регистрация и тренировка слов по курсам.</p>
-        </div>
-
-        <div class="tabs">
-          <button class="tab-btn active" data-auth-tab="login">Вход</button>
-          <button class="tab-btn" data-auth-tab="register">Регистрация</button>
-        </div>
-
-        <form class="auth-form active" id="loginForm">
-          <label>
-            Email
-            <input id="loginEmail" type="email" placeholder="example@mail.com" required />
-          </label>
-
-          <label>
-            Пароль
-            <input id="loginPassword" type="password" placeholder="Пароль" required />
-          </label>
-
-          <button class="primary full" type="submit">Войти</button>
-        </form>
-
-        <form class="auth-form" id="registerForm">
-          <label>
-            Имя
-            <input id="registerName" type="text" placeholder="Ваше имя" required />
-          </label>
-
-          <label>
-            Email
-            <input id="registerEmail" type="email" placeholder="example@mail.com" required />
-          </label>
-
-          <label>
-            Пароль
-            <input id="registerPassword" type="password" placeholder="Минимум 6 символов" minlength="6" required />
-          </label>
-
-          <button class="primary full" type="submit">Создать аккаунт</button>
-        </form>
-
-        <p class="message" id="authMessage"></p>
-      </section>
-
-      <section class="screen" id="yearScreen">
-        <button class="back-btn" data-back-screen="authScreen">← Назад</button>
-
-        <div class="center-card">
-          <p class="eyebrow">Step 1</p>
-          <h2>Выбери учебный год</h2>
-          <p class="subtitle">После выбора откроется приветственная анимация.</p>
-
-          <select id="yearSelect" class="big-select">
-            <option value="2026">2026 год</option>
-            <option value="2027">2027 год</option>
-            <option value="2028">2028 год</option>
-          </select>
-
-          <button class="primary full" id="yearBtn">Продолжить</button>
-        </div>
-      </section>
-
-      <section class="screen" id="welcomeScreen">
+      <section class="screen active" id="welcomeScreen">
         <div class="welcome-box">
           <div class="sparkle">✨</div>
-          <h2>Добро пожаловать<br />на сайт Боташки</h2>
+          <h1>Сайт Боташки</h1>
+          <h2>Добро пожаловать</h2>
           <p>English + Chinese courses</p>
+          <button class="primary full" id="startBtn">Начать обучение</button>
         </div>
       </section>
 
       <section class="screen" id="homeScreen">
-        <button class="back-btn" data-back-screen="yearScreen">← Назад к году</button>
-
         <header class="top">
           <div>
-            <p class="eyebrow" id="userLine">Botashki</p>
+            <p class="eyebrow">Botashki 2026</p>
             <h1>Курсы</h1>
           </div>
-
-          <button class="icon-btn" id="logoutBtn" title="Выйти">⇥</button>
         </header>
 
         <section class="course-grid">
@@ -109,83 +41,12 @@
           <button class="course-card chinese" data-course="chinese">
             <span>🇨🇳</span>
             <strong>Китайский</strong>
-            <small>Flip card, Hanzi, pinyin, search, test</small>
+            <small>Flip card, hanzi, pinyin, search, test</small>
           </button>
         </section>
 
         <section class="menu-actions">
-          <button class="secondary full" id="profileOpenBtn">👤 Мой профиль</button>
           <button class="secondary full" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
-          <button class="secondary full hidden" id="adminOpenBtn">📩 Админ-панель</button>
-        </section>
-      </section>
-
-      <section class="screen" id="profileScreen">
-        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
-
-        <header class="top">
-          <div>
-            <p class="eyebrow">Profile</p>
-            <h1>Мой профиль</h1>
-          </div>
-
-          <button class="icon-btn" data-back-home title="Назад">⌂</button>
-        </header>
-
-        <section class="profile-card">
-          <div class="avatar-circle" id="profileAvatar">B</div>
-          <h2 id="profileName">Botashki</h2>
-          <p id="profileEmail" class="subtitle">email</p>
-        </section>
-
-        <section class="profile-info-grid">
-          <div class="profile-info">
-            <small>Учебный год</small>
-            <strong id="profileYear">2026</strong>
-          </div>
-
-          <div class="profile-info">
-            <small>Дата регистрации</small>
-            <strong id="profileCreated">—</strong>
-          </div>
-
-          <div class="profile-info">
-            <small>Тема</small>
-            <strong id="profileTheme">light</strong>
-          </div>
-
-          <div class="profile-info">
-            <small>Цвет</small>
-            <strong id="profileColor">blue</strong>
-          </div>
-        </section>
-
-        <section class="panel">
-          <h2>Статистика обучения</h2>
-
-          <div class="course-progress-card">
-            <div>
-              <strong>English</strong>
-              <p id="profileEnglishText">0 / 0 words</p>
-            </div>
-            <span id="profileEnglishPercent">0%</span>
-          </div>
-
-          <div class="progress-bar">
-            <div id="profileEnglishLine"></div>
-          </div>
-
-          <div class="course-progress-card">
-            <div>
-              <strong>Chinese</strong>
-              <p id="profileChineseText">0 / 0 words</p>
-            </div>
-            <span id="profileChinesePercent">0%</span>
-          </div>
-
-          <div class="progress-bar">
-            <div id="profileChineseLine"></div>
-          </div>
         </section>
       </section>
 
@@ -266,7 +127,7 @@
           <p class="subtitle" id="englishTestCounter">Question 1/10</p>
 
           <div class="test-question english-question">
-            <h2 id="englishTestWord">springing up</h2>
+            <h2 id="englishTestWord">word</h2>
             <p>Choose the meaning</p>
           </div>
 
@@ -283,13 +144,13 @@
               <article class="card-face card-front">
                 <p class="hint">Нажми, чтобы открыть перевод</p>
                 <p class="unit-label" id="unitLabel">UNIT-1</p>
-                <h2 id="word">springing up</h2>
+                <h2 id="word">word</h2>
                 <p class="tap-text">Tap card</p>
               </article>
 
               <article class="card-face card-back">
-                <p class="unit-label back-unit" id="backUnitLabel">UNIT-1</p>
-                <h2 id="backWord">springing up</h2>
+                <p class="unit-label" id="backUnitLabel">UNIT-1</p>
+                <h2 id="backWord">word</h2>
 
                 <div class="details">
                   <div class="detail-box">
@@ -496,57 +357,12 @@
           <h2>Пожелания админу</h2>
           <p class="subtitle">Напиши идею, ошибку или пожелание по улучшению сайта.</p>
 
+          <input id="suggestionName" type="text" placeholder="Ваше имя" />
           <textarea id="suggestionText" rows="5" placeholder="Например: добавьте тесты по UNIT-4..."></textarea>
 
           <button class="primary full" id="sendSuggestionBtn">Отправить админу</button>
           <p class="message" id="suggestionMessage"></p>
         </div>
-      </section>
-
-      <section class="screen" id="adminScreen">
-        <button class="back-btn" data-back-screen="settingsScreen">← Назад к настройкам</button>
-
-        <header class="top">
-          <div>
-            <p class="eyebrow">Admin panel</p>
-            <h1>Админ</h1>
-          </div>
-
-          <button class="icon-btn" data-back-home title="Назад">⌂</button>
-        </header>
-
-        <section class="admin-tabs">
-          <button class="admin-tab-btn active" id="adminSuggestionsTab">📩 Пожелания</button>
-          <button class="admin-tab-btn" id="adminUsersTab">👥 Пользователи</button>
-          <button class="admin-tab-btn" id="adminActionsTab">📊 Действия</button>
-        </section>
-
-        <section class="admin-box" id="adminSuggestionsBox">
-          <div class="list-head">
-            <h2>Пожелания</h2>
-            <button class="small-btn" id="refreshSuggestionsBtn">Обновить</button>
-          </div>
-
-          <div id="suggestionsList">Загрузка...</div>
-        </section>
-
-        <section class="admin-box hidden" id="adminUsersBox">
-          <div class="list-head">
-            <h2>Пользователи</h2>
-            <button class="small-btn" id="refreshUsersBtn">Обновить</button>
-          </div>
-
-          <div id="usersList">Загрузка...</div>
-        </section>
-
-        <section class="admin-box hidden" id="adminActionsBox">
-          <div class="list-head">
-            <h2>Действия пользователей</h2>
-            <button class="small-btn" id="refreshActionsBtn">Обновить</button>
-          </div>
-
-          <div id="actionsList">Загрузка...</div>
-        </section>
       </section>
 
       <footer>

@@ -12,10 +12,6 @@ const supabaseClient = hasSupabaseConfig
   ? window.supabase.createClient(config.url, config.anonKey)
   : null;
 
-let session = null;
-let currentUser = null;
-let profile = null;
-
 let mode = "order";
 let currentUnit = "ALL";
 let filteredWords = [...WORDS];
@@ -64,32 +60,16 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-async function logUserAction(actionType, actionText) {
-  if (!supabaseClient || !currentUser) return;
-
-  await supabaseClient.from("user_actions").insert({
-    user_id: currentUser.id,
-    user_email: currentUser.email,
-    action_type: actionType,
-    action_text: actionText,
-  });
-}
-
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
-}
-
-function getPercent(part, total) {
-  if (!total) return 0;
-  return Math.round((part / total) * 100);
 }
 
 /* THEME */
 
 function getSavedSettings() {
   return {
-    theme: localStorage.getItem("siteTheme") || profile?.theme || "light",
-    color: localStorage.getItem("siteColor") || profile?.accent_color || "blue",
+    theme: localStorage.getItem("siteTheme") || "light",
+    color: localStorage.getItem("siteColor") || "blue",
   };
 }
 
@@ -112,197 +92,11 @@ function applyTheme(theme, color) {
   if ($("colorSelect")) $("colorSelect").value = color;
 }
 
-/* SUPABASE AUTH */
-
-async function fetchProfile() {
-  if (!supabaseClient || !currentUser) return null;
-
-  let { data, error } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("id", currentUser.id)
-    .maybeSingle();
-
-  if (!data && !error) {
-    const inserted = await supabaseClient
-      .from("profiles")
-      .insert({
-        id: currentUser.id,
-        email: currentUser.email,
-        full_name: currentUser.user_metadata?.full_name || "",
-      })
-      .select("*")
-      .single();
-
-    data = inserted.data;
-  }
-
-  profile = data || null;
-  return profile;
-}
-
-async function initAuth() {
-  if (!supabaseClient) {
-    showScreen("authScreen");
-    setMessage(
-      "authMessage",
-      "Сначала вставь Supabase URL и anon key в supabase-config.js",
-      true
-    );
-    return;
-  }
-
-  const { data } = await supabaseClient.auth.getSession();
-
-  session = data.session;
-  currentUser = session?.user || null;
-
-  supabaseClient.auth.onAuthStateChange(async (_event, newSession) => {
-    session = newSession;
-    currentUser = newSession?.user || null;
-
-    if (currentUser) {
-      await afterLogin();
-    } else {
-      showScreen("authScreen");
-    }
-  });
-
-  if (currentUser) {
-    await afterLogin();
-  } else {
-    showScreen("authScreen");
-  }
-}
-
-async function afterLogin() {
-  await fetchProfile();
-  await loadRemoteEnglishProgress();
-  await loadRemoteChineseProgress();
-
-  const settings = getSavedSettings();
-  applyTheme(settings.theme, settings.color);
-
-  const name = profile?.full_name || currentUser?.email || "Botashki";
-  $("userLine").textContent = `${name} · ${profile?.selected_year || 2026}`;
-
-  $("adminOpenBtn").classList.toggle("hidden", !profile?.is_admin);
-
-  fillUnitSelect();
-  updateFilteredWords();
-  fillWordSelect();
-  renderCard();
-
-  fillChineseUnitSelect();
-  updateFilteredChineseWords();
-  fillChineseWordSelect();
-  renderChineseCard();
-
-  renderProfile();
-
-  await logUserAction("auth", "Пользователь вошел на сайт");
-
-  if (!profile?.selected_year) {
-    showScreen("yearScreen");
-  } else {
-    showScreen("homeScreen");
-  }
-}
-
-function setupAuthForms() {
-  document.querySelectorAll(".tab-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.classList.remove("active");
-      });
-
-      button.classList.add("active");
-
-      const tab = button.dataset.authTab;
-
-      $("loginForm").classList.toggle("active", tab === "login");
-      $("registerForm").classList.toggle("active", tab === "register");
-
-      setMessage("authMessage", "");
-    });
-  });
-
-  $("loginForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!supabaseClient) return;
-
-    const email = $("loginEmail").value.trim();
-    const password = $("loginPassword").value;
-
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage("authMessage", "Ошибка входа: " + error.message, true);
-    } else {
-      setMessage("authMessage", "Успешный вход!");
-    }
-  });
-
-  $("registerForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!supabaseClient) return;
-
-    const fullName = $("registerName").value.trim();
-    const email = $("registerEmail").value.trim();
-    const password = $("registerPassword").value;
-
-    const { error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (error) {
-      setMessage("authMessage", "Ошибка регистрации: " + error.message, true);
-    } else {
-      setMessage(
-        "authMessage",
-        "Аккаунт создан. Если включено подтверждение email, открой почту."
-      );
-    }
-  });
-}
-
 /* NAVIGATION */
 
 function setupNavigation() {
-  $("yearBtn").addEventListener("click", async () => {
-    const selectedYear = Number($("yearSelect").value);
-
-    if (supabaseClient && currentUser) {
-      await supabaseClient
-        .from("profiles")
-        .update({
-          selected_year: selectedYear,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", currentUser.id);
-
-      profile = {
-        ...profile,
-        selected_year: selectedYear,
-      };
-    }
-
-    await logUserAction("year", `Выбрал учебный год: ${selectedYear}`);
-
-    showScreen("welcomeScreen");
-
-    setTimeout(() => {
-      showScreen("homeScreen");
-    }, 1900);
+  $("startBtn").addEventListener("click", () => {
+    showScreen("homeScreen");
   });
 
   document.querySelectorAll("[data-course]").forEach((button) => {
@@ -311,12 +105,10 @@ function setupNavigation() {
 
       if (course === "english") {
         showScreen("englishScreen");
-        logUserAction("course", "Открыл раздел English");
       }
 
       if (course === "chinese") {
         showScreen("chineseScreen");
-        logUserAction("course", "Открыл раздел Chinese");
       }
     });
   });
@@ -328,90 +120,17 @@ function setupNavigation() {
   });
 
   document.querySelectorAll("[data-back-screen]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const screenId = button.dataset.backScreen;
-
-      if (screenId === "authScreen" && supabaseClient && currentUser) {
-        await logUserAction("auth", "Пользователь вышел из аккаунта");
-        await supabaseClient.auth.signOut();
-        return;
-      }
-
-      showScreen(screenId);
+    button.addEventListener("click", () => {
+      showScreen(button.dataset.backScreen);
     });
-  });
-
-  $("profileOpenBtn").addEventListener("click", () => {
-    renderProfile();
-    showScreen("profileScreen");
-    logUserAction("profile", "Открыл профиль");
   });
 
   $("settingsOpenBtn").addEventListener("click", () => {
     showScreen("settingsScreen");
-    logUserAction("settings", "Открыл настройки");
-  });
-
-  $("adminOpenBtn").addEventListener("click", async () => {
-    showScreen("adminScreen");
-    setAdminTab("suggestions");
-    await logUserAction("admin", "Открыл админ-панель");
-    await loadSuggestionsForAdmin();
-  });
-
-  $("logoutBtn").addEventListener("click", async () => {
-    if (supabaseClient) {
-      await logUserAction("auth", "Пользователь вышел из аккаунта");
-      await supabaseClient.auth.signOut();
-    }
-
-    showScreen("authScreen");
   });
 }
 
-/* PROFILE */
-
-function renderProfile() {
-  if (!currentUser) return;
-
-  const settings = getSavedSettings();
-
-  const name = profile?.full_name || currentUser.email || "Botashki";
-  const email = currentUser.email || "No email";
-
-  const englishLearnedCount = WORDS.filter((item) => {
-    return learned.has(makeLearnedKey(item));
-  }).length;
-
-  const chineseLearnedCount = CHINESE_WORDS.filter((item) => {
-    return learnedChinese.has(makeChineseLearnedKey(item));
-  }).length;
-
-  const englishPercent = getPercent(englishLearnedCount, WORDS.length);
-  const chinesePercent = getPercent(chineseLearnedCount, CHINESE_WORDS.length);
-
-  $("profileAvatar").textContent = name.trim().charAt(0).toUpperCase() || "B";
-  $("profileName").textContent = name;
-  $("profileEmail").textContent = email;
-  $("profileYear").textContent = profile?.selected_year || 2026;
-
-  $("profileCreated").textContent = currentUser.created_at
-    ? new Date(currentUser.created_at).toLocaleDateString()
-    : "—";
-
-  $("profileTheme").textContent = settings.theme;
-  $("profileColor").textContent = settings.color;
-
-  $("profileEnglishText").textContent = `${englishLearnedCount} / ${WORDS.length} words`;
-  $("profileEnglishPercent").textContent = `${englishPercent}%`;
-  $("profileEnglishLine").style.width = `${englishPercent}%`;
-
-  $("profileChineseText").textContent = `${chineseLearnedCount} / ${CHINESE_WORDS.length} words`;
-  $("profileChinesePercent").textContent = `${chinesePercent}%`;
-  $("profileChineseLine").style.width = `${chinesePercent}%`;
-}
-
-/* ENGLISH TRAINER */
+/* ENGLISH */
 
 function makeLearnedKey(item) {
   return `${item.unit || "NO_UNIT"}__${item.word}__${item.example || ""}`;
@@ -419,39 +138,6 @@ function makeLearnedKey(item) {
 
 function saveLocalEnglishProgress() {
   localStorage.setItem("learnedWords", JSON.stringify([...learned]));
-}
-
-async function loadRemoteEnglishProgress() {
-  if (!supabaseClient || !currentUser) return;
-
-  const { data, error } = await supabaseClient
-    .from("user_progress")
-    .select("word_key")
-    .eq("user_id", currentUser.id)
-    .eq("course", "english")
-    .eq("learned", true);
-
-  if (!error && data) {
-    data.forEach((row) => learned.add(row.word_key));
-    saveLocalEnglishProgress();
-  }
-}
-
-async function saveRemoteEnglishProgress(wordKey, isLearned) {
-  if (!supabaseClient || !currentUser) return;
-
-  await supabaseClient.from("user_progress").upsert(
-    {
-      user_id: currentUser.id,
-      course: "english",
-      word_key: wordKey,
-      learned: isLearned,
-      updated_at: new Date().toISOString(),
-    },
-    {
-      onConflict: "user_id,course,word_key",
-    }
-  );
 }
 
 function getUnits() {
@@ -585,7 +271,6 @@ function renderCard() {
   $("card").classList.remove("open");
 
   renderEnglishAllWordsList();
-  renderProfile();
 }
 
 function nextIndex() {
@@ -759,35 +444,27 @@ function setupEnglishTrainer() {
     renderCard();
   });
 
-  $("learnedBtn").addEventListener("click", async () => {
+  $("learnedBtn").addEventListener("click", () => {
     if (filteredWords.length === 0) return;
 
     const item = getCurrentWord();
     const key = makeLearnedKey(item);
-    const isLearned = learned.has(key);
 
-    if (isLearned) {
+    if (learned.has(key)) {
       learned.delete(key);
     } else {
       learned.add(key);
     }
 
     saveLocalEnglishProgress();
-    await saveRemoteEnglishProgress(key, !isLearned);
-    await logUserAction(
-      "progress",
-      `${!isLearned ? "Выучил" : "Убрал из выученных"} English word: ${item.word}`
-    );
-
     renderCard();
   });
 
-  $("resetBtn").addEventListener("click", async () => {
-    if (!confirm("Сбросить локальный прогресс English?")) return;
+  $("resetBtn").addEventListener("click", () => {
+    if (!confirm("Сбросить прогресс English?")) return;
 
     learned.clear();
     saveLocalEnglishProgress();
-    await logUserAction("progress", "Сбросил локальный прогресс English");
     renderCard();
   });
 
@@ -826,7 +503,6 @@ function setupEnglishTrainer() {
     $("englishTestBox").classList.add("hidden");
     $("englishListBox").classList.toggle("hidden");
     renderEnglishAllWordsList();
-    logUserAction("english", "Открыл список всех English слов");
   });
 
   $("englishCloseListBtn").addEventListener("click", () => {
@@ -835,7 +511,6 @@ function setupEnglishTrainer() {
 
   $("englishTestBtn").addEventListener("click", () => {
     startEnglishTest();
-    logUserAction("test", "Начал English test");
   });
 
   $("englishCloseTestBtn").addEventListener("click", () => {
@@ -847,7 +522,7 @@ function setupEnglishTrainer() {
   });
 }
 
-/* CHINESE TRAINER */
+/* CHINESE */
 
 function makeChineseLearnedKey(item) {
   return `${item.unit || "UNIT-1"}__${item.hanzi}__${item.pinyin}`;
@@ -855,39 +530,6 @@ function makeChineseLearnedKey(item) {
 
 function saveChineseProgress() {
   localStorage.setItem("learnedChineseWords", JSON.stringify([...learnedChinese]));
-}
-
-async function loadRemoteChineseProgress() {
-  if (!supabaseClient || !currentUser) return;
-
-  const { data, error } = await supabaseClient
-    .from("user_progress")
-    .select("word_key")
-    .eq("user_id", currentUser.id)
-    .eq("course", "chinese")
-    .eq("learned", true);
-
-  if (!error && data) {
-    data.forEach((row) => learnedChinese.add(row.word_key));
-    saveChineseProgress();
-  }
-}
-
-async function saveRemoteChineseProgress(wordKey, isLearned) {
-  if (!supabaseClient || !currentUser) return;
-
-  await supabaseClient.from("user_progress").upsert(
-    {
-      user_id: currentUser.id,
-      course: "chinese",
-      word_key: wordKey,
-      learned: isLearned,
-      updated_at: new Date().toISOString(),
-    },
-    {
-      onConflict: "user_id,course,word_key",
-    }
-  );
 }
 
 function getChineseUnits() {
@@ -1038,7 +680,6 @@ function renderChineseCard() {
   $("chineseCard").classList.remove("open");
 
   renderChineseAllWordsList();
-  renderProfile();
 }
 
 function nextChineseIndex() {
@@ -1221,26 +862,19 @@ function setupChineseTrainer() {
     renderChineseCard();
   });
 
-  $("chLearnedBtn").addEventListener("click", async () => {
+  $("chLearnedBtn").addEventListener("click", () => {
     if (filteredChineseWords.length === 0) return;
 
     const item = getCurrentChineseWord();
     const key = makeChineseLearnedKey(item);
-    const isLearned = learnedChinese.has(key);
 
-    if (isLearned) {
+    if (learnedChinese.has(key)) {
       learnedChinese.delete(key);
     } else {
       learnedChinese.add(key);
     }
 
     saveChineseProgress();
-    await saveRemoteChineseProgress(key, !isLearned);
-    await logUserAction(
-      "progress",
-      `${!isLearned ? "Выучил" : "Убрал из выученных"} Chinese word: ${item.hanzi}`
-    );
-
     renderChineseCard();
   });
 
@@ -1281,7 +915,6 @@ function setupChineseTrainer() {
     $("chineseTestBox").classList.add("hidden");
     $("chineseListBox").classList.toggle("hidden");
     renderChineseAllWordsList();
-    logUserAction("chinese", "Открыл список всех Chinese слов");
   });
 
   $("chCloseListBtn").addEventListener("click", () => {
@@ -1290,7 +923,6 @@ function setupChineseTrainer() {
 
   $("chTestBtn").addEventListener("click", () => {
     startChineseTest();
-    logUserAction("test", "Начал Chinese test");
   });
 
   $("chCloseTestBtn").addEventListener("click", () => {
@@ -1302,49 +934,22 @@ function setupChineseTrainer() {
   });
 }
 
-/* SETTINGS */
+/* SETTINGS + SUGGESTIONS */
 
 function setupSettings() {
   const settings = getSavedSettings();
   applyTheme(settings.theme, settings.color);
 
-  $("saveSettingsBtn").addEventListener("click", async () => {
+  $("saveSettingsBtn").addEventListener("click", () => {
     const theme = $("themeSelect").value;
     const color = $("colorSelect").value;
 
     applyTheme(theme, color);
-    renderProfile();
-
-    if (supabaseClient && currentUser) {
-      const { error } = await supabaseClient
-        .from("profiles")
-        .update({
-          theme,
-          accent_color: color,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", currentUser.id);
-
-      if (error) {
-        setMessage(
-          "suggestionMessage",
-          "Настройки локально сохранены, но Supabase не обновился.",
-          true
-        );
-      } else {
-        profile = {
-          ...profile,
-          theme,
-          accent_color: color,
-        };
-
-        await logUserAction("settings", `Изменил настройки: theme=${theme}, color=${color}`);
-        setMessage("suggestionMessage", "Настройки сохранены.");
-      }
-    }
+    setMessage("suggestionMessage", "Настройки сохранены.");
   });
 
   $("sendSuggestionBtn").addEventListener("click", async () => {
+    const name = $("suggestionName").value.trim() || "Гость";
     const message = $("suggestionText").value.trim();
 
     if (!message) {
@@ -1352,331 +957,48 @@ function setupSettings() {
       return;
     }
 
-    if (!supabaseClient || !currentUser) {
-      setMessage("suggestionMessage", "Нужно войти через Supabase.", true);
+    if (!supabaseClient) {
+      setMessage("suggestionMessage", "Supabase не подключен.", true);
       return;
     }
 
     const { error } = await supabaseClient.from("suggestions").insert({
-      user_id: currentUser.id,
-      user_email: currentUser.email,
+      user_email: name,
       message,
+      status: "new",
     });
 
     if (error) {
       setMessage("suggestionMessage", "Ошибка отправки: " + error.message, true);
     } else {
       $("suggestionText").value = "";
-      await logUserAction("suggestion", "Пользователь отправил пожелание админу");
       setMessage("suggestionMessage", "Пожелание отправлено админу 💌");
     }
   });
 }
 
-/* ADMIN */
-
-function setupAdminTabs() {
-  const suggestionsTab = $("adminSuggestionsTab");
-  const usersTab = $("adminUsersTab");
-  const actionsTab = $("adminActionsTab");
-
-  if (!suggestionsTab || !usersTab || !actionsTab) return;
-
-  suggestionsTab.addEventListener("click", async () => {
-    setAdminTab("suggestions");
-    await loadSuggestionsForAdmin();
-  });
-
-  usersTab.addEventListener("click", async () => {
-    setAdminTab("users");
-    await loadUsersForAdmin();
-  });
-
-  actionsTab.addEventListener("click", async () => {
-    setAdminTab("actions");
-    await loadActionsForAdmin();
-  });
-
-  $("refreshSuggestionsBtn").addEventListener("click", loadSuggestionsForAdmin);
-  $("refreshUsersBtn").addEventListener("click", loadUsersForAdmin);
-  $("refreshActionsBtn").addEventListener("click", loadActionsForAdmin);
-}
-
-function setAdminTab(tab) {
-  $("adminSuggestionsTab").classList.toggle("active", tab === "suggestions");
-  $("adminUsersTab").classList.toggle("active", tab === "users");
-  $("adminActionsTab").classList.toggle("active", tab === "actions");
-
-  $("adminSuggestionsBox").classList.toggle("hidden", tab !== "suggestions");
-  $("adminUsersBox").classList.toggle("hidden", tab !== "users");
-  $("adminActionsBox").classList.toggle("hidden", tab !== "actions");
-}
-
-async function loadSuggestionsForAdmin() {
-  const container = $("suggestionsList");
-
-  if (!supabaseClient || !profile?.is_admin) {
-    container.textContent = "Нет доступа.";
-    return;
-  }
-
-  container.textContent = "Загрузка...";
-
-  const { data, error } = await supabaseClient
-    .from("suggestions")
-    .select("id, user_email, message, status, created_at")
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  if (error) {
-    container.textContent = "Ошибка загрузки: " + error.message;
-    return;
-  }
-
-  if (!data || !data.length) {
-    container.textContent = "Пожеланий пока нет.";
-    return;
-  }
-
-  container.innerHTML = data
-    .map((item) => {
-      const status = item.status || "new";
-      const statusText = status === "done" ? "Выполнено" : "Новое";
-
-      return `
-        <div class="admin-item ${status === "done" ? "done" : ""}">
-          <div class="admin-item-top">
-            <strong>${escapeHtml(item.user_email || "unknown")}</strong>
-            <span class="status-badge ${status === "done" ? "done" : ""}">${statusText}</span>
-          </div>
-
-          <p>${escapeHtml(item.message)}</p>
-
-          <small>${new Date(item.created_at).toLocaleString()}</small>
-
-          <div class="admin-actions">
-            <button class="small-btn done-btn" data-done-id="${item.id}">
-              ✓ Выполнено
-            </button>
-
-            <button class="small-btn danger-btn" data-delete-id="${item.id}">
-              🗑 Удалить
-            </button>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
-
-  document.querySelectorAll("[data-done-id]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      await markSuggestionDone(button.dataset.doneId);
-    });
-  });
-
-  document.querySelectorAll("[data-delete-id]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      await deleteSuggestion(button.dataset.deleteId);
-    });
-  });
-}
-
-async function markSuggestionDone(id) {
-  if (!supabaseClient || !profile?.is_admin) return;
-
-  const { error } = await supabaseClient
-    .from("suggestions")
-    .update({ status: "done" })
-    .eq("id", id);
-
-  if (error) {
-    alert("Ошибка: " + error.message);
-    return;
-  }
-
-  await logUserAction("admin", "Админ отметил пожелание как выполненное");
-  await loadSuggestionsForAdmin();
-}
-
-async function deleteSuggestion(id) {
-  if (!supabaseClient || !profile?.is_admin) return;
-
-  const ok = confirm("Удалить это пожелание?");
-  if (!ok) return;
-
-  const { error } = await supabaseClient
-    .from("suggestions")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert("Ошибка: " + error.message);
-    return;
-  }
-
-  await logUserAction("admin", "Админ удалил пожелание");
-  await loadSuggestionsForAdmin();
-}
-
-async function loadUsersForAdmin() {
-  const container = $("usersList");
-
-  if (!supabaseClient || !profile?.is_admin) {
-    container.textContent = "Нет доступа.";
-    return;
-  }
-
-  container.textContent = "Загрузка...";
-
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("id, email, full_name, selected_year, theme, accent_color, is_admin, created_at")
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  if (error) {
-    container.textContent = "Ошибка загрузки пользователей: " + error.message;
-    return;
-  }
-
-  if (!data || !data.length) {
-    container.textContent = "Пользователей пока нет.";
-    return;
-  }
-
-  container.innerHTML = data
-    .map((user) => {
-      const name = user.full_name || "Без имени";
-      const year = user.selected_year || "—";
-      const theme = user.theme || "light";
-      const color = user.accent_color || "blue";
-      const adminLabel = user.is_admin ? `<span class="status-badge done">Admin</span>` : "";
-
-      return `
-        <div class="admin-item">
-          <div class="admin-item-top">
-            <strong>${escapeHtml(name)}</strong>
-            ${adminLabel}
-          </div>
-
-          <p>${escapeHtml(user.email || "no email")}</p>
-
-          <div class="user-meta-grid">
-            <div>
-              <small>Год</small>
-              <b>${escapeHtml(year)}</b>
-            </div>
-
-            <div>
-              <small>Тема</small>
-              <b>${escapeHtml(theme)}</b>
-            </div>
-
-            <div>
-              <small>Цвет</small>
-              <b>${escapeHtml(color)}</b>
-            </div>
-
-            <div>
-              <small>Дата</small>
-              <b>${user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</b>
-            </div>
-          </div>
-
-          <div class="admin-actions one">
-            <button class="small-btn reset-btn" data-reset-email="${escapeHtml(user.email || "")}">
-              🔑 Сбросить пароль
-            </button>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
-
-  document.querySelectorAll("[data-reset-email]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const email = button.dataset.resetEmail;
-      await sendPasswordReset(email);
-    });
-  });
-}
-
-async function sendPasswordReset(email) {
-  if (!email) {
-    alert("Email пользователя не найден.");
-    return;
-  }
-
-  const ok = confirm(`Отправить письмо для сброса пароля на ${email}?`);
-  if (!ok) return;
-
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin,
-  });
-
-  if (error) {
-    alert("Ошибка: " + error.message);
-    return;
-  }
-
-  await logUserAction("admin", `Админ отправил сброс пароля для ${email}`);
-  alert("Письмо для сброса пароля отправлено.");
-}
-
-async function loadActionsForAdmin() {
-  const container = $("actionsList");
-
-  if (!supabaseClient || !profile?.is_admin) {
-    container.textContent = "Нет доступа.";
-    return;
-  }
-
-  container.textContent = "Загрузка...";
-
-  const { data, error } = await supabaseClient
-    .from("user_actions")
-    .select("id, user_email, action_type, action_text, created_at")
-    .order("created_at", { ascending: false })
-    .limit(150);
-
-  if (error) {
-    container.textContent = "Ошибка загрузки действий: " + error.message;
-    return;
-  }
-
-  if (!data || !data.length) {
-    container.textContent = "Действий пока нет.";
-    return;
-  }
-
-  container.innerHTML = data
-    .map((item) => {
-      return `
-        <div class="admin-item">
-          <div class="admin-item-top">
-            <strong>${escapeHtml(item.user_email || "unknown")}</strong>
-            <span class="status-badge">${escapeHtml(item.action_type)}</span>
-          </div>
-
-          <p>${escapeHtml(item.action_text)}</p>
-
-          <small>${new Date(item.created_at).toLocaleString()}</small>
-        </div>
-      `;
-    })
-    .join("");
-}
-
 /* BOOT */
 
 function boot() {
-  setupAuthForms();
+  const settings = getSavedSettings();
+  applyTheme(settings.theme, settings.color);
+
   setupNavigation();
+
+  fillUnitSelect();
+  updateFilteredWords();
+  fillWordSelect();
+  renderCard();
+
   setupEnglishTrainer();
+
+  fillChineseUnitSelect();
+  updateFilteredChineseWords();
+  fillChineseWordSelect();
+  renderChineseCard();
+
   setupChineseTrainer();
   setupSettings();
-  setupAdminTabs();
-  initAuth();
 }
 
 boot();
