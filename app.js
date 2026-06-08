@@ -995,6 +995,7 @@ function setupSettings() {
 function boot() {
   applyTheme(getSavedSettings().theme, getSavedSettings().color);
   renderUserLine();
+  updateAdminButton();
 
   setupAuth();
   setupNavigation();
@@ -1019,5 +1020,179 @@ function boot() {
     showScreen("authScreen");
   }
 }
+
+
+function isAdminUser() {
+  return Boolean(appUser && appUser.is_admin === true);
+}
+
+function updateAdminButton() {
+  const adminBtn = $("adminOpenBtn");
+  if (!adminBtn) return;
+
+  adminBtn.classList.toggle("hidden", !isAdminUser());
+}
+
+async function loadAdminUsers() {
+  const list = $("adminUsersList");
+  const passwordInput = $("adminPassword");
+
+  if (!list || !passwordInput) return;
+
+  if (!appUser || !appUser.is_admin) {
+    setMessage("adminMessage", "Нет доступа. Вы не админ.", true);
+    return;
+  }
+
+  const adminPassword = passwordInput.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  if (!supabaseClient) {
+    setMessage("adminMessage", "Supabase не подключен.", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Загрузка...");
+
+  const { data, error } = await supabaseClient.rpc("admin_list_users", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Ошибка доступа", true);
+    return;
+  }
+
+  const users = data.users || [];
+
+  if (!users.length) {
+    list.innerHTML = `<p class="subtitle">Пользователей пока нет.</p>`;
+    setMessage("adminMessage", "Пользователей нет.");
+    return;
+  }
+
+  list.innerHTML = users
+    .map((user) => {
+      const created = user.created_at
+        ? new Date(user.created_at).toLocaleString()
+        : "—";
+
+      return `
+        <div class="admin-user-card">
+          <div class="admin-user-top">
+            <div>
+              <strong>${escapeHtml(user.name)}</strong>
+              <p>${escapeHtml(user.phone)}</p>
+            </div>
+
+            <span class="admin-badge ${user.is_admin ? "admin" : ""}">
+              ${user.is_admin ? "ADMIN" : "USER"}
+            </span>
+          </div>
+
+          <small>Тіркелген / Дата регистрации: ${created}</small>
+
+          <div class="admin-actions">
+            <button class="small-btn" type="button" data-reset-user="${user.id}">
+              🔑 Новый пароль
+            </button>
+
+            <button class="small-btn danger-btn" type="button" data-delete-user="${user.id}">
+              🗑 Удалить
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  document.querySelectorAll("[data-delete-user]").forEach((button) => {
+    button.addEventListener("click", () => {
+      adminDeleteUser(button.dataset.deleteUser);
+    });
+  });
+
+  document.querySelectorAll("[data-reset-user]").forEach((button) => {
+    button.addEventListener("click", () => {
+      adminSetPassword(button.dataset.resetUser);
+    });
+  });
+
+  setMessage("adminMessage", "Пользователи загружены.");
+}
+
+async function adminDeleteUser(userId) {
+  const adminPassword = $("adminPassword")?.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  const ok = confirm("Удалить этого пользователя?");
+  if (!ok) return;
+
+  const { data, error } = await supabaseClient.rpc("admin_delete_user", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+    p_user_id: userId,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка удаления: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Не удалось удалить", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Пользователь удалён.");
+  await loadAdminUsers();
+}
+
+async function adminSetPassword(userId) {
+  const adminPassword = $("adminPassword")?.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  const newPassword = prompt("Введите новый пароль для пользователя:");
+
+  if (!newPassword) return;
+
+  const { data, error } = await supabaseClient.rpc("admin_set_user_password", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+    p_user_id: userId,
+    p_new_password: newPassword,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Не удалось обновить пароль", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Пароль пользователя обновлён.");
+}
+
 
 boot();

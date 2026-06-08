@@ -126,6 +126,7 @@
 
         <section class="menu-actions">
           <button class="secondary full" type="button" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
+          <button class="secondary full hidden" type="button" id="adminOpenBtn">👑 Админ-панель</button>
         </section>
       </section>
 
@@ -429,6 +430,40 @@
           <p class="message" id="suggestionMessage"></p>
         </div>
       </section>
+
+      <section class="screen" id="adminScreen">
+  <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Админ-панель</h1>
+    </div>
+
+    <button class="icon-btn" type="button" data-back-home>⌂</button>
+  </header>
+
+  <div class="panel">
+    <label>
+      Пароль админа
+      <input id="adminPassword" type="password" placeholder="Введите свой пароль" />
+    </label>
+
+    <button class="primary full" type="button" id="adminLoadUsersBtn">Показать пользователей</button>
+    <p class="message" id="adminMessage"></p>
+  </div>
+
+  <div class="admin-box">
+    <div class="list-head">
+      <h2>Пользователи</h2>
+      <button class="small-btn" type="button" id="adminRefreshBtn">Обновить</button>
+    </div>
+
+    <div id="adminUsersList">
+      <p class="subtitle">Введите пароль админа и нажмите “Показать пользователей”.</p>
+    </div>
+  </div>
+</section>
 
       <footer>
         <p>Автор Боташка Красотка Балапашка</p>

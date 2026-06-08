@@ -846,3 +846,75 @@ footer {
     font-size: 56px;
   }
 }
+
+
+
+
+
+.admin-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.admin-user-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 14px;
+  background: rgba(148, 163, 184, 0.08);
+  margin-bottom: 12px;
+}
+
+.admin-user-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.admin-user-top strong {
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.admin-user-top p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.admin-badge {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.admin-badge.admin {
+  background: rgba(22, 163, 74, 0.16);
+  color: var(--success);
+}
+
+.admin-user-card small {
+  display: block;
+  color: var(--muted);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.danger-btn {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--danger);
+}
