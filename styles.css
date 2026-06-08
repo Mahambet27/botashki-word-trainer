@@ -813,44 +813,6 @@ footer {
   border-color: rgba(220, 38, 38, 0.55);
 }
 
-@media (max-width: 380px) {
-  .phone-bg {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 31px;
-  }
-
-  .actions {
-    grid-template-columns: 1fr;
-  }
-
-  .settings-row,
-  .english-tools,
-  .chinese-tools,
-  .auth-tabs {
-    grid-template-columns: 1fr;
-  }
-
-  .word-list-item {
-    grid-template-columns: 30px 54px 1fr;
-  }
-
-  .english-list-item {
-    grid-template-columns: 30px 1fr;
-  }
-
-  .chinese-front h2,
-  .chinese-back h2 {
-    font-size: 56px;
-  }
-}
-
-
-
-
-
 .admin-box {
   background: var(--card);
   border: 1px solid var(--border);
@@ -917,4 +879,42 @@ footer {
 .danger-btn {
   background: rgba(220, 38, 38, 0.12);
   color: var(--danger);
+}
+
+@media (max-width: 380px) {
+  .phone-bg {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 31px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-row,
+  .english-tools,
+  .chinese-tools,
+  .auth-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .word-list-item {
+    grid-template-columns: 30px 54px 1fr;
+  }
+
+  .english-list-item {
+    grid-template-columns: 30px 1fr;
+  }
+
+  .chinese-front h2,
+  .chinese-back h2 {
+    font-size: 56px;
+  }
+
+  .admin-actions {
+    grid-template-columns: 1fr;
+  }
 }

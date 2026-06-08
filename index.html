@@ -14,7 +14,6 @@
   <div class="phone-bg">
     <main class="app">
 
-      <!-- AUTH -->
       <section class="screen active" id="authScreen">
         <div class="brand-card">
           <p class="eyebrow">BOTASHKI 2026</p>
@@ -31,7 +30,7 @@
         <form class="auth-form active" id="loginForm">
           <label>
             Телефон
-            <input id="loginPhone" type="tel" placeholder="+77001234567" required />
+            <input id="loginPhone" type="tel" placeholder="87055772819" required />
           </label>
 
           <label>
@@ -50,7 +49,7 @@
 
           <label>
             Телефон
-            <input id="registerPhone" type="tel" placeholder="+77001234567" required />
+            <input id="registerPhone" type="tel" placeholder="87055772819" required />
           </label>
 
           <label>
@@ -69,7 +68,7 @@
         <form class="auth-form" id="resetForm">
           <label>
             Телефон
-            <input id="resetPhone" type="tel" placeholder="+77001234567" required />
+            <input id="resetPhone" type="tel" placeholder="87055772819" required />
           </label>
 
           <label>
@@ -88,7 +87,6 @@
         <p class="message" id="authMessage"></p>
       </section>
 
-      <!-- WELCOME -->
       <section class="screen" id="welcomeScreen">
         <div class="welcome-box">
           <div class="sparkle">✨</div>
@@ -99,7 +97,6 @@
         </div>
       </section>
 
-      <!-- HOME -->
       <section class="screen" id="homeScreen">
         <header class="top">
           <div>
@@ -130,7 +127,6 @@
         </section>
       </section>
 
-      <!-- ENGLISH -->
       <section class="screen" id="englishScreen">
         <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
@@ -257,7 +253,6 @@
         </section>
       </section>
 
-      <!-- CHINESE -->
       <section class="screen" id="chineseScreen">
         <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
@@ -385,7 +380,6 @@
         </section>
       </section>
 
-      <!-- SETTINGS -->
       <section class="screen" id="settingsScreen">
         <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
@@ -432,38 +426,42 @@
       </section>
 
       <section class="screen" id="adminScreen">
-  <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
+        <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
-  <header class="top">
-    <div>
-      <p class="eyebrow">Admin</p>
-      <h1>Админ-панель</h1>
-    </div>
+        <header class="top">
+          <div>
+            <p class="eyebrow">Admin</p>
+            <h1>Админ-панель</h1>
+          </div>
 
-    <button class="icon-btn" type="button" data-back-home>⌂</button>
-  </header>
+          <button class="icon-btn" type="button" data-back-home>⌂</button>
+        </header>
 
-  <div class="panel">
-    <label>
-      Пароль админа
-      <input id="adminPassword" type="password" placeholder="Введите свой пароль" />
-    </label>
+        <div class="panel">
+          <p class="subtitle">
+            Админ видит пользователей и может удалить аккаунт или поставить новый пароль.
+          </p>
 
-    <button class="primary full" type="button" id="adminLoadUsersBtn">Показать пользователей</button>
-    <p class="message" id="adminMessage"></p>
-  </div>
+          <label>
+            Пароль админа
+            <input id="adminPassword" type="password" placeholder="Введите свой пароль" />
+          </label>
 
-  <div class="admin-box">
-    <div class="list-head">
-      <h2>Пользователи</h2>
-      <button class="small-btn" type="button" id="adminRefreshBtn">Обновить</button>
-    </div>
+          <button class="primary full" type="button" id="adminLoadUsersBtn">Показать пользователей</button>
+          <p class="message" id="adminMessage"></p>
+        </div>
 
-    <div id="adminUsersList">
-      <p class="subtitle">Введите пароль админа и нажмите “Показать пользователей”.</p>
-    </div>
-  </div>
-</section>
+        <div class="admin-box">
+          <div class="list-head">
+            <h2>Пользователи</h2>
+            <button class="small-btn" type="button" id="adminRefreshBtn">Обновить</button>
+          </div>
+
+          <div id="adminUsersList">
+            <p class="subtitle">Введите пароль админа и нажмите “Показать пользователей”.</p>
+          </div>
+        </div>
+      </section>
 
       <footer>
         <p>Автор Боташка Красотка Балапашка</p>

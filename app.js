@@ -13,7 +13,13 @@ const supabaseClient =
     ? window.supabase.createClient(config.url, config.anonKey)
     : null;
 
-const WORD_LIST = Array.isArray(window.WORDS) ? window.WORDS : typeof WORDS !== "undefined" ? WORDS : [];
+const WORD_LIST =
+  Array.isArray(window.WORDS)
+    ? window.WORDS
+    : typeof WORDS !== "undefined"
+      ? WORDS
+      : [];
+
 const CHINESE_LIST =
   Array.isArray(window.CHINESE_WORDS)
     ? window.CHINESE_WORDS
@@ -45,16 +51,29 @@ let chineseTestIndex = 0;
 let chineseTestScore = 0;
 let currentChineseTestAnswer = "";
 
+const ADMIN_PHONES = [
+  "87055772819",
+  "+87055772819",
+  "77055772819",
+  "+77055772819"
+];
+
+function normalizePhone(phone) {
+  return String(phone || "").replace(/\s+/g, "").trim();
+}
+
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((screen) => {
     screen.classList.toggle("active", screen.id === id);
   });
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function setMessage(id, text, isError = false) {
   const element = $(id);
   if (!element) return;
+
   element.textContent = text || "";
   element.classList.toggle("error", isError);
 }
@@ -72,9 +91,29 @@ function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
 
+function isAdminUser() {
+  if (!appUser) return false;
+
+  const phone = normalizePhone(appUser.phone);
+
+  return appUser.is_admin === true || ADMIN_PHONES.includes(phone);
+}
+
+function updateAdminButton() {
+  const adminBtn = $("adminOpenBtn");
+  if (!adminBtn) return;
+
+  adminBtn.classList.toggle("hidden", !isAdminUser());
+}
+
 function saveUser(user) {
-  appUser = user;
-  localStorage.setItem("botashkiUser", JSON.stringify(user));
+  appUser = {
+    ...user,
+    phone: normalizePhone(user.phone),
+    is_admin: user.is_admin === true || ADMIN_PHONES.includes(normalizePhone(user.phone))
+  };
+
+  localStorage.setItem("botashkiUser", JSON.stringify(appUser));
   renderUserLine();
 }
 
@@ -86,12 +125,18 @@ function clearUser() {
 
 function renderUserLine() {
   if ($("userLine")) {
-    $("userLine").textContent = appUser ? `${appUser.name} · ${appUser.phone}` : "BOTASHKI 2026";
+    $("userLine").textContent = appUser
+      ? `${appUser.name} · ${appUser.phone}${isAdminUser() ? " · ADMIN" : ""}`
+      : "BOTASHKI 2026";
   }
 
   if ($("welcomeName")) {
-    $("welcomeName").textContent = appUser ? `${appUser.name}, добро пожаловать!` : "на сайт Боташки";
+    $("welcomeName").textContent = appUser
+      ? `${appUser.name}, добро пожаловать!`
+      : "на сайт Боташки";
   }
+
+  updateAdminButton();
 }
 
 function getSavedSettings() {
@@ -279,9 +324,187 @@ function setupNavigation() {
   if ($("settingsOpenBtn")) {
     $("settingsOpenBtn").addEventListener("click", () => showScreen("settingsScreen"));
   }
+
+  if ($("adminOpenBtn")) {
+    $("adminOpenBtn").addEventListener("click", () => {
+      if (!isAdminUser()) {
+        alert("Нет доступа. Вы не админ.");
+        return;
+      }
+
+      showScreen("adminScreen");
+    });
+  }
+
+  if ($("adminLoadUsersBtn")) {
+    $("adminLoadUsersBtn").addEventListener("click", loadAdminUsers);
+  }
+
+  if ($("adminRefreshBtn")) {
+    $("adminRefreshBtn").addEventListener("click", loadAdminUsers);
+  }
 }
 
-/* ENGLISH */
+async function loadAdminUsers() {
+  const list = $("adminUsersList");
+  const passwordInput = $("adminPassword");
+
+  if (!list || !passwordInput) return;
+
+  if (!isAdminUser()) {
+    setMessage("adminMessage", "Нет доступа. Вы не админ.", true);
+    return;
+  }
+
+  const adminPassword = passwordInput.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  if (!supabaseClient) {
+    setMessage("adminMessage", "Supabase не подключен.", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Загрузка...");
+
+  const { data, error } = await supabaseClient.rpc("admin_list_users", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Ошибка доступа", true);
+    return;
+  }
+
+  const users = data.users || [];
+
+  if (!users.length) {
+    list.innerHTML = `<p class="subtitle">Пользователей пока нет.</p>`;
+    setMessage("adminMessage", "Пользователей нет.");
+    return;
+  }
+
+  list.innerHTML = users
+    .map((user) => {
+      const created = user.created_at
+        ? new Date(user.created_at).toLocaleString()
+        : "—";
+
+      return `
+        <div class="admin-user-card">
+          <div class="admin-user-top">
+            <div>
+              <strong>${escapeHtml(user.name)}</strong>
+              <p>${escapeHtml(user.phone)}</p>
+            </div>
+
+            <span class="admin-badge ${user.is_admin ? "admin" : ""}">
+              ${user.is_admin ? "ADMIN" : "USER"}
+            </span>
+          </div>
+
+          <small>Дата регистрации: ${created}</small>
+
+          <div class="admin-actions">
+            <button class="small-btn" type="button" data-reset-user="${user.id}">
+              🔑 Новый пароль
+            </button>
+
+            <button class="small-btn danger-btn" type="button" data-delete-user="${user.id}">
+              🗑 Удалить
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  document.querySelectorAll("[data-delete-user]").forEach((button) => {
+    button.addEventListener("click", () => {
+      adminDeleteUser(button.dataset.deleteUser);
+    });
+  });
+
+  document.querySelectorAll("[data-reset-user]").forEach((button) => {
+    button.addEventListener("click", () => {
+      adminSetPassword(button.dataset.resetUser);
+    });
+  });
+
+  setMessage("adminMessage", "Пользователи загружены.");
+}
+
+async function adminDeleteUser(userId) {
+  const adminPassword = $("adminPassword")?.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  const ok = confirm("Удалить этого пользователя?");
+  if (!ok) return;
+
+  const { data, error } = await supabaseClient.rpc("admin_delete_user", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+    p_user_id: userId,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка удаления: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Не удалось удалить", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Пользователь удалён.");
+  await loadAdminUsers();
+}
+
+async function adminSetPassword(userId) {
+  const adminPassword = $("adminPassword")?.value;
+
+  if (!adminPassword) {
+    setMessage("adminMessage", "Введите пароль админа.", true);
+    return;
+  }
+
+  const newPassword = prompt("Введите новый пароль для пользователя:");
+
+  if (!newPassword) return;
+
+  const { data, error } = await supabaseClient.rpc("admin_set_user_password", {
+    p_admin_phone: appUser.phone,
+    p_admin_password: adminPassword,
+    p_user_id: userId,
+    p_new_password: newPassword,
+  });
+
+  if (error) {
+    setMessage("adminMessage", "Ошибка: " + error.message, true);
+    return;
+  }
+
+  if (!data || !data.success) {
+    setMessage("adminMessage", data?.message || "Не удалось обновить пароль", true);
+    return;
+  }
+
+  setMessage("adminMessage", "Пароль пользователя обновлён.");
+}
 
 function makeLearnedKey(item) {
   return `${item.unit || "NO_UNIT"}__${item.word || ""}`;
@@ -313,7 +536,9 @@ function fillUnitSelect() {
 function updateFilteredWords() {
   const search = $("searchInput")?.value.trim().toLowerCase() || "";
 
-  let list = currentUnit === "ALL" ? [...WORD_LIST] : WORD_LIST.filter((item) => item.unit === currentUnit);
+  let list = currentUnit === "ALL"
+    ? [...WORD_LIST]
+    : WORD_LIST.filter((item) => item.unit === currentUnit);
 
   if (search) {
     list = list.filter((item) =>
@@ -350,15 +575,15 @@ function fillWordSelect() {
 
 function renderCard() {
   if (!filteredWords.length) {
-    $("word").textContent = "No word";
-    $("backWord").textContent = "No word";
-    $("meaning").textContent = "Not found";
-    $("example").textContent = "";
-    $("russian").textContent = "";
-    $("currentNumber").textContent = "0";
-    $("totalNumber").textContent = "0";
-    $("learnedNumber").textContent = "0";
-    $("progressLine").style.width = "0%";
+    if ($("word")) $("word").textContent = "No word";
+    if ($("backWord")) $("backWord").textContent = "No word";
+    if ($("meaning")) $("meaning").textContent = "Not found";
+    if ($("example")) $("example").textContent = "";
+    if ($("russian")) $("russian").textContent = "";
+    if ($("currentNumber")) $("currentNumber").textContent = "0";
+    if ($("totalNumber")) $("totalNumber").textContent = "0";
+    if ($("learnedNumber")) $("learnedNumber").textContent = "0";
+    if ($("progressLine")) $("progressLine").style.width = "0%";
     return;
   }
 
@@ -395,9 +620,11 @@ function nextIndex() {
 
   if (mode === "random") {
     let randomIndex;
+
     do {
       randomIndex = Math.floor(Math.random() * filteredWords.length);
     } while (randomIndex === index);
+
     return randomIndex;
   }
 
@@ -420,6 +647,7 @@ function renderEnglishAllWordsList() {
 
   box.innerHTML = filteredWords.map((item, i) => {
     const isLearned = learned.has(makeLearnedKey(item));
+
     return `
       <button class="word-list-item english-list-item ${isLearned ? "learned" : ""}" type="button" data-en-list-index="${i}">
         <span class="word-list-number">${i + 1}</span>
@@ -492,8 +720,12 @@ function checkEnglishTestAnswer(answer) {
 
   document.querySelectorAll("#englishTestOptions .test-option").forEach((button) => {
     button.disabled = true;
-    if (button.dataset.answer === currentEnglishTestAnswer) button.classList.add("correct");
-    else if (button.dataset.answer === answer) button.classList.add("wrong");
+
+    if (button.dataset.answer === currentEnglishTestAnswer) {
+      button.classList.add("correct");
+    } else if (button.dataset.answer === answer) {
+      button.classList.add("wrong");
+    }
   });
 
   $("englishNextTestBtn").classList.remove("hidden");
@@ -539,8 +771,11 @@ function setupEnglishTrainer() {
 
       const key = makeLearnedKey(filteredWords[index]);
 
-      if (learned.has(key)) learned.delete(key);
-      else learned.add(key);
+      if (learned.has(key)) {
+        learned.delete(key);
+      } else {
+        learned.add(key);
+      }
 
       saveEnglishProgress();
       renderCard();
@@ -550,6 +785,7 @@ function setupEnglishTrainer() {
   if ($("resetBtn")) {
     $("resetBtn").addEventListener("click", () => {
       if (!confirm("Сбросить прогресс English?")) return;
+
       learned.clear();
       saveEnglishProgress();
       renderCard();
@@ -614,8 +850,6 @@ function setupEnglishTrainer() {
     $("englishNextTestBtn").addEventListener("click", nextEnglishTestQuestion);
   }
 }
-
-/* CHINESE */
 
 function makeChineseLearnedKey(item) {
   return `${item.unit || "UNIT-1"}__${item.hanzi || ""}__${item.pinyin || ""}`;
@@ -687,17 +921,17 @@ function fillChineseWordSelect() {
 
 function renderChineseCard() {
   if (!filteredChineseWords.length) {
-    $("chHanzi").textContent = "No word";
-    $("chBackHanzi").textContent = "No word";
-    $("chPinyin").textContent = "";
-    $("chBackPinyin").textContent = "";
-    $("chMeaning").textContent = "Not found";
-    $("chExample").textContent = "";
-    $("chRussian").textContent = "";
-    $("chCurrentNumber").textContent = "0";
-    $("chTotalNumber").textContent = "0";
-    $("chLearnedNumber").textContent = "0";
-    $("chProgressLine").style.width = "0%";
+    if ($("chHanzi")) $("chHanzi").textContent = "No word";
+    if ($("chBackHanzi")) $("chBackHanzi").textContent = "No word";
+    if ($("chPinyin")) $("chPinyin").textContent = "";
+    if ($("chBackPinyin")) $("chBackPinyin").textContent = "";
+    if ($("chMeaning")) $("chMeaning").textContent = "Not found";
+    if ($("chExample")) $("chExample").textContent = "";
+    if ($("chRussian")) $("chRussian").textContent = "";
+    if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
+    if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
+    if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
+    if ($("chProgressLine")) $("chProgressLine").style.width = "0%";
     return;
   }
 
@@ -736,9 +970,11 @@ function nextChineseIndex() {
 
   if (chineseMode === "random") {
     let randomIndex;
+
     do {
       randomIndex = Math.floor(Math.random() * filteredChineseWords.length);
     } while (randomIndex === chineseIndex);
+
     return randomIndex;
   }
 
@@ -761,6 +997,7 @@ function renderChineseAllWordsList() {
 
   box.innerHTML = filteredChineseWords.map((item, i) => {
     const isLearned = learnedChinese.has(makeChineseLearnedKey(item));
+
     return `
       <button class="word-list-item ${isLearned ? "learned" : ""}" type="button" data-ch-list-index="${i}">
         <span class="word-list-number">${i + 1}</span>
@@ -834,8 +1071,12 @@ function checkChineseTestAnswer(answer) {
 
   document.querySelectorAll("#chTestOptions .test-option").forEach((button) => {
     button.disabled = true;
-    if (button.dataset.answer === currentChineseTestAnswer) button.classList.add("correct");
-    else if (button.dataset.answer === answer) button.classList.add("wrong");
+
+    if (button.dataset.answer === currentChineseTestAnswer) {
+      button.classList.add("correct");
+    } else if (button.dataset.answer === answer) {
+      button.classList.add("wrong");
+    }
   });
 
   $("chNextTestBtn").classList.remove("hidden");
@@ -882,8 +1123,11 @@ function setupChineseTrainer() {
 
       const key = makeChineseLearnedKey(filteredChineseWords[chineseIndex]);
 
-      if (learnedChinese.has(key)) learnedChinese.delete(key);
-      else learnedChinese.add(key);
+      if (learnedChinese.has(key)) {
+        learnedChinese.delete(key);
+      } else {
+        learnedChinese.add(key);
+      }
 
       saveChineseProgress();
       renderChineseCard();
@@ -995,7 +1239,6 @@ function setupSettings() {
 function boot() {
   applyTheme(getSavedSettings().theme, getSavedSettings().color);
   renderUserLine();
-  updateAdminButton();
 
   setupAuth();
   setupNavigation();
@@ -1013,6 +1256,7 @@ function boot() {
   setupChineseTrainer();
 
   setupSettings();
+  updateAdminButton();
 
   if (appUser) {
     showScreen("homeScreen");
@@ -1020,179 +1264,5 @@ function boot() {
     showScreen("authScreen");
   }
 }
-
-
-function isAdminUser() {
-  return Boolean(appUser && appUser.is_admin === true);
-}
-
-function updateAdminButton() {
-  const adminBtn = $("adminOpenBtn");
-  if (!adminBtn) return;
-
-  adminBtn.classList.toggle("hidden", !isAdminUser());
-}
-
-async function loadAdminUsers() {
-  const list = $("adminUsersList");
-  const passwordInput = $("adminPassword");
-
-  if (!list || !passwordInput) return;
-
-  if (!appUser || !appUser.is_admin) {
-    setMessage("adminMessage", "Нет доступа. Вы не админ.", true);
-    return;
-  }
-
-  const adminPassword = passwordInput.value;
-
-  if (!adminPassword) {
-    setMessage("adminMessage", "Введите пароль админа.", true);
-    return;
-  }
-
-  if (!supabaseClient) {
-    setMessage("adminMessage", "Supabase не подключен.", true);
-    return;
-  }
-
-  setMessage("adminMessage", "Загрузка...");
-
-  const { data, error } = await supabaseClient.rpc("admin_list_users", {
-    p_admin_phone: appUser.phone,
-    p_admin_password: adminPassword,
-  });
-
-  if (error) {
-    setMessage("adminMessage", "Ошибка: " + error.message, true);
-    return;
-  }
-
-  if (!data || !data.success) {
-    setMessage("adminMessage", data?.message || "Ошибка доступа", true);
-    return;
-  }
-
-  const users = data.users || [];
-
-  if (!users.length) {
-    list.innerHTML = `<p class="subtitle">Пользователей пока нет.</p>`;
-    setMessage("adminMessage", "Пользователей нет.");
-    return;
-  }
-
-  list.innerHTML = users
-    .map((user) => {
-      const created = user.created_at
-        ? new Date(user.created_at).toLocaleString()
-        : "—";
-
-      return `
-        <div class="admin-user-card">
-          <div class="admin-user-top">
-            <div>
-              <strong>${escapeHtml(user.name)}</strong>
-              <p>${escapeHtml(user.phone)}</p>
-            </div>
-
-            <span class="admin-badge ${user.is_admin ? "admin" : ""}">
-              ${user.is_admin ? "ADMIN" : "USER"}
-            </span>
-          </div>
-
-          <small>Тіркелген / Дата регистрации: ${created}</small>
-
-          <div class="admin-actions">
-            <button class="small-btn" type="button" data-reset-user="${user.id}">
-              🔑 Новый пароль
-            </button>
-
-            <button class="small-btn danger-btn" type="button" data-delete-user="${user.id}">
-              🗑 Удалить
-            </button>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
-
-  document.querySelectorAll("[data-delete-user]").forEach((button) => {
-    button.addEventListener("click", () => {
-      adminDeleteUser(button.dataset.deleteUser);
-    });
-  });
-
-  document.querySelectorAll("[data-reset-user]").forEach((button) => {
-    button.addEventListener("click", () => {
-      adminSetPassword(button.dataset.resetUser);
-    });
-  });
-
-  setMessage("adminMessage", "Пользователи загружены.");
-}
-
-async function adminDeleteUser(userId) {
-  const adminPassword = $("adminPassword")?.value;
-
-  if (!adminPassword) {
-    setMessage("adminMessage", "Введите пароль админа.", true);
-    return;
-  }
-
-  const ok = confirm("Удалить этого пользователя?");
-  if (!ok) return;
-
-  const { data, error } = await supabaseClient.rpc("admin_delete_user", {
-    p_admin_phone: appUser.phone,
-    p_admin_password: adminPassword,
-    p_user_id: userId,
-  });
-
-  if (error) {
-    setMessage("adminMessage", "Ошибка удаления: " + error.message, true);
-    return;
-  }
-
-  if (!data || !data.success) {
-    setMessage("adminMessage", data?.message || "Не удалось удалить", true);
-    return;
-  }
-
-  setMessage("adminMessage", "Пользователь удалён.");
-  await loadAdminUsers();
-}
-
-async function adminSetPassword(userId) {
-  const adminPassword = $("adminPassword")?.value;
-
-  if (!adminPassword) {
-    setMessage("adminMessage", "Введите пароль админа.", true);
-    return;
-  }
-
-  const newPassword = prompt("Введите новый пароль для пользователя:");
-
-  if (!newPassword) return;
-
-  const { data, error } = await supabaseClient.rpc("admin_set_user_password", {
-    p_admin_phone: appUser.phone,
-    p_admin_password: adminPassword,
-    p_user_id: userId,
-    p_new_password: newPassword,
-  });
-
-  if (error) {
-    setMessage("adminMessage", "Ошибка: " + error.message, true);
-    return;
-  }
-
-  if (!data || !data.success) {
-    setMessage("adminMessage", data?.message || "Не удалось обновить пароль", true);
-    return;
-  }
-
-  setMessage("adminMessage", "Пароль пользователя обновлён.");
-}
-
 
 boot();
