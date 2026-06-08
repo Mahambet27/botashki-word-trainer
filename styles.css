@@ -160,10 +160,8 @@ h2 {
 }
 
 .brand-card,
-.center-card,
 .panel,
-.welcome-box,
-.profile-card {
+.welcome-box {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 30px;
@@ -184,7 +182,6 @@ h2 {
   text-align: center;
   align-content: center;
   gap: 12px;
-  overflow: hidden;
 }
 
 .welcome-box h1 {
@@ -323,13 +320,6 @@ textarea:focus {
   box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
 }
 
-.primary:hover,
-.secondary:hover,
-.icon-btn:hover,
-.back-btn:hover {
-  transform: translateY(-2px);
-}
-
 .secondary,
 .icon-btn,
 .back-btn {
@@ -337,6 +327,13 @@ textarea:focus {
   color: var(--dark);
   border: 1px solid var(--border);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.primary:hover,
+.secondary:hover,
+.icon-btn:hover,
+.back-btn:hover {
+  transform: translateY(-2px);
 }
 
 .full {
@@ -385,7 +382,7 @@ textarea:focus {
   align-content: end;
   gap: 8px;
   box-shadow: 0 24px 52px rgba(15, 23, 42, 0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: 0.2s ease;
   overflow: hidden;
   position: relative;
 }
@@ -403,24 +400,26 @@ textarea:focus {
 
 .course-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.25);
+}
+
+.course-card span,
+.course-card strong,
+.course-card small {
+  position: relative;
 }
 
 .course-card span {
   font-size: 40px;
-  position: relative;
 }
 
 .course-card strong {
   font-size: 29px;
-  position: relative;
 }
 
 .course-card small {
   font-size: 14px;
   opacity: 0.92;
   font-weight: 750;
-  position: relative;
 }
 
 .course-card.english {
@@ -450,7 +449,6 @@ textarea:focus {
   text-align: center;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--border);
-  backdrop-filter: blur(14px);
 }
 
 .stat span {
@@ -468,10 +466,6 @@ textarea:focus {
   display: grid;
   gap: 10px;
   margin-bottom: 14px;
-}
-
-.search-label input {
-  height: 52px;
 }
 
 .card-zone {
@@ -517,7 +511,6 @@ textarea:focus {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  backdrop-filter: blur(18px);
 }
 
 .card-front h2 {
@@ -556,7 +549,6 @@ textarea:focus {
   background: var(--card);
   transform: rotateY(180deg);
   overflow-y: auto;
-  backdrop-filter: blur(18px);
 }
 
 .card-back h2 {
@@ -587,10 +579,7 @@ textarea:focus {
   font-weight: 750;
 }
 
-.chinese-flip-card {
-  min-height: 430px;
-}
-
+.chinese-flip-card,
 .chinese-flip-card .card-inner {
   min-height: 430px;
 }
@@ -624,10 +613,6 @@ textarea:focus {
 .chinese-back .unit-label {
   text-align: center;
   display: block;
-}
-
-.chinese-back .details {
-  margin-top: 14px;
 }
 
 .chinese-back .detail-box {
@@ -680,7 +665,6 @@ footer {
   box-shadow: var(--shadow);
   max-height: 430px;
   overflow-y: auto;
-  backdrop-filter: blur(18px);
 }
 
 .test-box {
@@ -712,7 +696,6 @@ footer {
   background: var(--soft);
   color: var(--primary);
   font-weight: 950;
-  cursor: pointer;
 }
 
 .word-list-item {
@@ -728,16 +711,10 @@ footer {
   gap: 10px;
   align-items: center;
   text-align: left;
-  cursor: pointer;
 }
 
 .english-list-item {
   grid-template-columns: 34px 1fr;
-}
-
-.word-list-item:hover {
-  border-color: var(--primary);
-  transform: translateY(-1px);
 }
 
 .word-list-item.learned {
@@ -836,10 +813,6 @@ footer {
   border-color: rgba(220, 38, 38, 0.55);
 }
 
-.test-option:disabled {
-  cursor: default;
-}
-
 @media (max-width: 380px) {
   .phone-bg {
     padding: 10px;
@@ -855,10 +828,7 @@ footer {
 
   .settings-row,
   .english-tools,
-  .chinese-tools {
-    grid-template-columns: 1fr;
-  }
-
+  .chinese-tools,
   .auth-tabs {
     grid-template-columns: 1fr;
   }
@@ -869,18 +839,6 @@ footer {
 
   .english-list-item {
     grid-template-columns: 30px 1fr;
-  }
-
-  .word-list-hanzi {
-    font-size: 24px;
-  }
-
-  .test-question h2 {
-    font-size: 46px;
-  }
-
-  .english-question h2 {
-    font-size: 30px;
   }
 
   .chinese-front h2,

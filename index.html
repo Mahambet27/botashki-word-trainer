@@ -9,21 +9,23 @@
 
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="phone-bg">
     <main class="app">
 
+      <!-- AUTH -->
       <section class="screen active" id="authScreen">
         <div class="brand-card">
-          <p class="eyebrow">Botashki 2026</p>
+          <p class="eyebrow">BOTASHKI 2026</p>
           <h1>Сайт Боташки</h1>
-          <p class="subtitle">Вход по номеру телефона и паролю.</p>
+          <p class="subtitle">Вход, регистрация и восстановление пароля.</p>
         </div>
 
         <div class="tabs auth-tabs">
-          <button class="tab-btn active" data-auth-tab="login">Вход</button>
-          <button class="tab-btn" data-auth-tab="register">Регистрация</button>
-          <button class="tab-btn" data-auth-tab="reset">Сброс</button>
+          <button class="tab-btn active" type="button" data-auth-tab="login">Вход</button>
+          <button class="tab-btn" type="button" data-auth-tab="register">Регистрация</button>
+          <button class="tab-btn" type="button" data-auth-tab="reset">Сброс</button>
         </div>
 
         <form class="auth-form active" id="loginForm">
@@ -58,7 +60,7 @@
 
           <label>
             Кодовое слово
-            <input id="registerRecoveryWord" type="text" placeholder="Запомни это слово" required />
+            <input id="registerRecoveryWord" type="text" placeholder="Например: алма" required />
           </label>
 
           <button class="primary full" type="submit">Создать аккаунт</button>
@@ -86,47 +88,50 @@
         <p class="message" id="authMessage"></p>
       </section>
 
+      <!-- WELCOME -->
       <section class="screen" id="welcomeScreen">
         <div class="welcome-box">
           <div class="sparkle">✨</div>
           <h1>Добро пожаловать</h1>
           <h2 id="welcomeName">на сайт Боташки</h2>
           <p>English + Chinese courses</p>
-          <button class="primary full" id="startBtn">Начать обучение</button>
+          <button class="primary full" type="button" id="startBtn">Начать обучение</button>
         </div>
       </section>
 
+      <!-- HOME -->
       <section class="screen" id="homeScreen">
         <header class="top">
           <div>
-            <p class="eyebrow" id="userLine">Botashki 2026</p>
+            <p class="eyebrow" id="userLine">BOTASHKI 2026</p>
             <h1>Курсы</h1>
           </div>
 
-          <button class="icon-btn" id="logoutBtn" title="Выйти">⇥</button>
+          <button class="icon-btn" type="button" id="logoutBtn" title="Выйти">⇥</button>
         </header>
 
         <section class="course-grid">
-          <button class="course-card english" data-course="english">
+          <button class="course-card english" type="button" data-course="english">
             <span>🇬🇧</span>
             <strong>Английский</strong>
-            <small>Cards, search, all words, random, test</small>
+            <small>Карточки, поиск, все слова, random, test</small>
           </button>
 
-          <button class="course-card chinese" data-course="chinese">
+          <button class="course-card chinese" type="button" data-course="chinese">
             <span>🇨🇳</span>
             <strong>Китайский</strong>
-            <small>Flip card, hanzi, pinyin, search, test</small>
+            <small>Иероглифы, пиньинь, перевод, поиск, test</small>
           </button>
         </section>
 
         <section class="menu-actions">
-          <button class="secondary full" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
+          <button class="secondary full" type="button" id="settingsOpenBtn">⚙ Настройки и пожелания</button>
         </section>
       </section>
 
+      <!-- ENGLISH -->
       <section class="screen" id="englishScreen">
-        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+        <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
         <header class="top">
           <div>
@@ -134,7 +139,7 @@
             <h1>Word Trainer</h1>
           </div>
 
-          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+          <button class="icon-btn" type="button" data-back-home>⌂</button>
         </header>
 
         <section class="stats">
@@ -165,38 +170,32 @@
             <select id="wordSelect"></select>
           </label>
 
-          <label class="search-label">
+          <label>
             Search word
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search: CPR, springing up, pose..."
-              autocomplete="off"
-            />
+            <input id="searchInput" type="text" placeholder="Search word..." autocomplete="off" />
           </label>
         </section>
 
         <section class="settings-row english-tools">
-          <button class="mode-btn active" data-mode="order">По порядку</button>
-          <button class="mode-btn" data-mode="random">Random</button>
-          <button class="mode-btn" id="englishAllWordsBtn">Все слова</button>
-          <button class="mode-btn" id="englishTestBtn">Тест</button>
-          <button class="mode-btn" id="resetBtn">Reset</button>
+          <button class="mode-btn active" type="button" data-mode="order">По порядку</button>
+          <button class="mode-btn" type="button" data-mode="random">Random</button>
+          <button class="mode-btn" type="button" id="englishAllWordsBtn">Все слова</button>
+          <button class="mode-btn" type="button" id="englishTestBtn">Тест</button>
+          <button class="mode-btn" type="button" id="resetBtn">Reset</button>
         </section>
 
         <section class="word-list-box hidden" id="englishListBox">
           <div class="list-head">
             <h2>Все English слова</h2>
-            <button class="small-btn" id="englishCloseListBtn">Закрыть</button>
+            <button class="small-btn" type="button" id="englishCloseListBtn">Закрыть</button>
           </div>
-
           <div id="englishAllWordsList"></div>
         </section>
 
         <section class="test-box hidden" id="englishTestBox">
           <div class="list-head">
             <h2>English test</h2>
-            <button class="small-btn" id="englishCloseTestBtn">Закрыть</button>
+            <button class="small-btn" type="button" id="englishCloseTestBtn">Закрыть</button>
           </div>
 
           <p class="subtitle" id="englishTestCounter">Question 1/10</p>
@@ -207,10 +206,8 @@
           </div>
 
           <div class="test-options" id="englishTestOptions"></div>
-
           <p class="message" id="englishTestMessage"></p>
-
-          <button class="primary full hidden" id="englishNextTestBtn">Следующий вопрос</button>
+          <button class="primary full hidden" type="button" id="englishNextTestBtn">Следующий вопрос</button>
         </section>
 
         <section class="card-zone">
@@ -218,13 +215,13 @@
             <div class="card-inner">
               <article class="card-face card-front">
                 <p class="hint">Нажми, чтобы открыть перевод</p>
-                <p class="unit-label" id="unitLabel">UNIT-1</p>
+                <p class="unit-label" id="unitLabel">UNIT</p>
                 <h2 id="word">word</h2>
                 <p class="tap-text">Tap card</p>
               </article>
 
               <article class="card-face card-back">
-                <p class="unit-label" id="backUnitLabel">UNIT-1</p>
+                <p class="unit-label" id="backUnitLabel">UNIT</p>
                 <h2 id="backWord">word</h2>
 
                 <div class="details">
@@ -249,9 +246,9 @@
         </section>
 
         <section class="actions">
-          <button class="secondary" id="prevBtn">← Назад</button>
-          <button class="primary" id="learnedBtn">Выучила</button>
-          <button class="secondary" id="nextBtn">Дальше →</button>
+          <button class="secondary" type="button" id="prevBtn">← Назад</button>
+          <button class="primary" type="button" id="learnedBtn">Выучила</button>
+          <button class="secondary" type="button" id="nextBtn">Дальше →</button>
         </section>
 
         <section class="progress-bar">
@@ -259,8 +256,9 @@
         </section>
       </section>
 
+      <!-- CHINESE -->
       <section class="screen" id="chineseScreen">
-        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+        <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
         <header class="top">
           <div>
@@ -268,7 +266,7 @@
             <h1>Китайский</h1>
           </div>
 
-          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+          <button class="icon-btn" type="button" data-back-home>⌂</button>
         </header>
 
         <section class="stats">
@@ -299,37 +297,31 @@
             <select id="chWordSelect"></select>
           </label>
 
-          <label class="search-label">
+          <label>
             Search Chinese word
-            <input
-              type="text"
-              id="chSearchInput"
-              placeholder="Search: 电话, diànhuà, phone..."
-              autocomplete="off"
-            />
+            <input id="chSearchInput" type="text" placeholder="电话, diànhuà, phone..." autocomplete="off" />
           </label>
         </section>
 
         <section class="settings-row chinese-tools">
-          <button class="ch-mode-btn active" data-ch-mode="order">По порядку</button>
-          <button class="ch-mode-btn" data-ch-mode="random">Random</button>
-          <button class="ch-mode-btn" id="chAllWordsBtn">Все слова</button>
-          <button class="ch-mode-btn" id="chTestBtn">Тест</button>
+          <button class="ch-mode-btn active" type="button" data-ch-mode="order">По порядку</button>
+          <button class="ch-mode-btn" type="button" data-ch-mode="random">Random</button>
+          <button class="ch-mode-btn" type="button" id="chAllWordsBtn">Все слова</button>
+          <button class="ch-mode-btn" type="button" id="chTestBtn">Тест</button>
         </section>
 
         <section class="word-list-box hidden" id="chineseListBox">
           <div class="list-head">
             <h2>Все Chinese слова</h2>
-            <button class="small-btn" id="chCloseListBtn">Закрыть</button>
+            <button class="small-btn" type="button" id="chCloseListBtn">Закрыть</button>
           </div>
-
           <div id="chineseAllWordsList"></div>
         </section>
 
         <section class="test-box hidden" id="chineseTestBox">
           <div class="list-head">
             <h2>Китайский тест</h2>
-            <button class="small-btn" id="chCloseTestBtn">Закрыть</button>
+            <button class="small-btn" type="button" id="chCloseTestBtn">Закрыть</button>
           </div>
 
           <p class="subtitle" id="chTestCounter">Вопрос 1/10</p>
@@ -340,10 +332,8 @@
           </div>
 
           <div class="test-options" id="chTestOptions"></div>
-
           <p class="message" id="chTestMessage"></p>
-
-          <button class="primary full hidden" id="chNextTestBtn">Следующий вопрос</button>
+          <button class="primary full hidden" type="button" id="chNextTestBtn">Следующий вопрос</button>
         </section>
 
         <section class="card-zone">
@@ -351,14 +341,14 @@
             <div class="card-inner">
               <article class="card-face card-front chinese-front">
                 <p class="hint">Нажми, чтобы открыть перевод</p>
-                <p class="unit-label" id="chUnit">UNIT-1</p>
+                <p class="unit-label" id="chUnit">UNIT</p>
                 <h2 id="chHanzi">电话</h2>
                 <p class="pinyin" id="chPinyin">diànhuà</p>
                 <p class="tap-text">Tap card</p>
               </article>
 
               <article class="card-face card-back chinese-back">
-                <p class="unit-label" id="chBackUnit">UNIT-1</p>
+                <p class="unit-label" id="chBackUnit">UNIT</p>
                 <h2 id="chBackHanzi">电话</h2>
                 <p class="pinyin" id="chBackPinyin">diànhuà</p>
 
@@ -384,9 +374,9 @@
         </section>
 
         <section class="actions">
-          <button class="secondary" id="chPrevBtn">← Назад</button>
-          <button class="primary" id="chLearnedBtn">Выучила</button>
-          <button class="secondary" id="chNextBtn">Дальше →</button>
+          <button class="secondary" type="button" id="chPrevBtn">← Назад</button>
+          <button class="primary" type="button" id="chLearnedBtn">Выучила</button>
+          <button class="secondary" type="button" id="chNextBtn">Дальше →</button>
         </section>
 
         <section class="progress-bar">
@@ -394,8 +384,9 @@
         </section>
       </section>
 
+      <!-- SETTINGS -->
       <section class="screen" id="settingsScreen">
-        <button class="back-btn" data-back-screen="homeScreen">← Назад к курсам</button>
+        <button class="back-btn" type="button" data-back-screen="homeScreen">← Назад к курсам</button>
 
         <header class="top">
           <div>
@@ -403,7 +394,7 @@
             <h1>Настройки</h1>
           </div>
 
-          <button class="icon-btn" data-back-home title="Назад">⌂</button>
+          <button class="icon-btn" type="button" data-back-home>⌂</button>
         </header>
 
         <div class="panel">
@@ -425,16 +416,16 @@
             </select>
           </label>
 
-          <button class="primary full" id="saveSettingsBtn">Сохранить настройки</button>
+          <button class="primary full" type="button" id="saveSettingsBtn">Сохранить настройки</button>
         </div>
 
         <div class="panel">
           <h2>Пожелания админу</h2>
-          <p class="subtitle">Напиши идею, ошибку или пожелание по улучшению сайта.</p>
+          <p class="subtitle">Напиши идею, ошибку или пожелание.</p>
 
-          <textarea id="suggestionText" rows="5" placeholder="Например: добавьте тесты по UNIT-4..."></textarea>
+          <textarea id="suggestionText" rows="5" placeholder="Например: добавьте больше слов..."></textarea>
 
-          <button class="primary full" id="sendSuggestionBtn">Отправить админу</button>
+          <button class="primary full" type="button" id="sendSuggestionBtn">Отправить админу</button>
           <p class="message" id="suggestionMessage"></p>
         </div>
       </section>
