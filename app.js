@@ -921,19 +921,21 @@ function fillChineseWordSelect() {
 
 function renderChineseCard() {
   if (!filteredChineseWords.length) {
-    if ($("chHanzi")) $("chHanzi").textContent = "No word";
-    if ($("chBackHanzi")) $("chBackHanzi").textContent = "No word";
-    if ($("chPinyin")) $("chPinyin").textContent = "";
-    if ($("chBackPinyin")) $("chBackPinyin").textContent = "";
-    if ($("chMeaning")) $("chMeaning").textContent = "Not found";
-    if ($("chExample")) $("chExample").textContent = "";
-    if ($("chRussian")) $("chRussian").textContent = "";
-    if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
-    if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
-    if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
-    if ($("chProgressLine")) $("chProgressLine").style.width = "0%";
-    return;
-  }
+  if ($("chHanzi")) $("chHanzi").textContent = "No word";
+  if ($("chBackHanzi")) $("chBackHanzi").textContent = "No word";
+  if ($("chFrontMeaning")) $("chFrontMeaning").textContent = "";
+  if ($("chPinyin")) $("chPinyin").textContent = "";
+  if ($("chBackPinyin")) $("chBackPinyin").textContent = "";
+  if ($("chBackPinyinText")) $("chBackPinyinText").textContent = "";
+  if ($("chMeaning")) $("chMeaning").textContent = "Not found";
+  if ($("chExample")) $("chExample").textContent = "";
+  if ($("chRussian")) $("chRussian").textContent = "";
+  if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
+  if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
+  if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
+  if ($("chProgressLine")) $("chProgressLine").style.width = "0%";
+  return;
+}
 
   const item = filteredChineseWords[chineseIndex];
   const key = makeChineseLearnedKey(item);
@@ -942,13 +944,24 @@ function renderChineseCard() {
   $("chUnit").textContent = item.unit || "UNIT-1";
   $("chBackUnit").textContent = item.unit || "UNIT-1";
 
-  $("chHanzi").textContent = item.hanzi || "";
-  $("chBackHanzi").textContent = item.hanzi || "";
-  $("chPinyin").textContent = item.pinyin || "";
-  $("chBackPinyin").textContent = item.pinyin || "";
-  $("chMeaning").textContent = item.meaning || "";
-  $("chExample").textContent = item.example || "";
-  $("chRussian").textContent = item.russian || "";
+ $("chHanzi").textContent = item.hanzi || "";
+$("chBackHanzi").textContent = item.hanzi || "";
+
+if ($("chFrontMeaning")) {
+  $("chFrontMeaning").textContent = item.russian || item.meaning || "";
+}
+
+$("chPinyin").textContent = item.pinyin || "";
+$("chBackPinyin").textContent = item.pinyin || "";
+
+$("chMeaning").textContent = item.meaning || "";
+
+if ($("chBackPinyinText")) {
+  $("chBackPinyinText").textContent = item.pinyin || "";
+}
+
+$("chExample").textContent = item.example || "";
+$("chRussian").textContent = item.russianExplanation || item.russian || item.meaning || "";
 
   $("chCurrentNumber").textContent = chineseIndex + 1;
   $("chTotalNumber").textContent = filteredChineseWords.length;

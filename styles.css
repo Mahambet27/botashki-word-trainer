@@ -918,3 +918,24 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+.ch-front-meaning {
+  margin: 8px 0 8px;
+  color: var(--dark);
+  font-size: 26px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.chinese-front .pinyin {
+  margin-top: 4px;
+  font-size: 28px;
+  color: var(--primary);
+  font-weight: 950;
+}
+
+#chBackPinyinText {
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: 950;
+}
