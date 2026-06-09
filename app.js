@@ -930,6 +930,8 @@ function renderChineseCard() {
   if ($("chMeaning")) $("chMeaning").textContent = "Not found";
   if ($("chExample")) $("chExample").textContent = "";
   if ($("chRussian")) $("chRussian").textContent = "";
+  if ($("chExamplePinyin")) $("chExamplePinyin").textContent = "";
+if ($("chExampleRussian")) $("chExampleRussian").textContent = "";
   if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
   if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
   if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
@@ -959,8 +961,16 @@ $("chMeaning").textContent = item.meaning || "";
 if ($("chBackPinyinText")) {
   $("chBackPinyinText").textContent = item.pinyin || "";
 }
-
 $("chExample").textContent = item.example || "";
+
+if ($("chExamplePinyin")) {
+  $("chExamplePinyin").textContent = item.examplePinyin || "";
+}
+
+if ($("chExampleRussian")) {
+  $("chExampleRussian").textContent = item.exampleRussian || "";
+}
+
 $("chRussian").textContent = item.russianExplanation || item.russian || item.meaning || "";
 
   $("chCurrentNumber").textContent = chineseIndex + 1;
