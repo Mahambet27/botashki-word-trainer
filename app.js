@@ -55,7 +55,7 @@ const ADMIN_PHONES = [
   "87055772819",
   "+87055772819",
   "77055772819",
-  "+77055772819"
+  "+77055772819",
 ];
 
 function normalizePhone(phone) {
@@ -110,7 +110,7 @@ function saveUser(user) {
   appUser = {
     ...user,
     phone: normalizePhone(user.phone),
-    is_admin: user.is_admin === true || ADMIN_PHONES.includes(normalizePhone(user.phone))
+    is_admin: user.is_admin === true || ADMIN_PHONES.includes(normalizePhone(user.phone)),
   };
 
   localStorage.setItem("botashkiUser", JSON.stringify(appUser));
@@ -395,9 +395,7 @@ async function loadAdminUsers() {
 
   list.innerHTML = users
     .map((user) => {
-      const created = user.created_at
-        ? new Date(user.created_at).toLocaleString()
-        : "—";
+      const created = user.created_at ? new Date(user.created_at).toLocaleString() : "—";
 
       return `
         <div class="admin-user-card">
@@ -536,9 +534,10 @@ function fillUnitSelect() {
 function updateFilteredWords() {
   const search = $("searchInput")?.value.trim().toLowerCase() || "";
 
-  let list = currentUnit === "ALL"
-    ? [...WORD_LIST]
-    : WORD_LIST.filter((item) => item.unit === currentUnit);
+  let list =
+    currentUnit === "ALL"
+      ? [...WORD_LIST]
+      : WORD_LIST.filter((item) => item.unit === currentUnit);
 
   if (search) {
     list = list.filter((item) =>
@@ -645,20 +644,22 @@ function renderEnglishAllWordsList() {
     return;
   }
 
-  box.innerHTML = filteredWords.map((item, i) => {
-    const isLearned = learned.has(makeLearnedKey(item));
+  box.innerHTML = filteredWords
+    .map((item, i) => {
+      const isLearned = learned.has(makeLearnedKey(item));
 
-    return `
-      <button class="word-list-item english-list-item ${isLearned ? "learned" : ""}" type="button" data-en-list-index="${i}">
-        <span class="word-list-number">${i + 1}</span>
-        <span class="word-list-hanzi">${escapeHtml(item.word)}</span>
-        <span class="word-list-info">
-          <strong>${escapeHtml(item.meaning)}</strong>
-          <small>${escapeHtml(item.russian)} · ${escapeHtml(item.unit)}</small>
-        </span>
-      </button>
-    `;
-  }).join("");
+      return `
+        <button class="word-list-item english-list-item ${isLearned ? "learned" : ""}" type="button" data-en-list-index="${i}">
+          <span class="word-list-number">${i + 1}</span>
+          <span class="word-list-hanzi">${escapeHtml(item.word)}</span>
+          <span class="word-list-info">
+            <strong>${escapeHtml(item.meaning)}</strong>
+            <small>${escapeHtml(item.russian)} · ${escapeHtml(item.unit)}</small>
+          </span>
+        </button>
+      `;
+    })
+    .join("");
 
   document.querySelectorAll("[data-en-list-index]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -699,9 +700,9 @@ function renderEnglishTestQuestion() {
 
   const options = shuffleArray([item.meaning, ...wrong]);
 
-  $("englishTestOptions").innerHTML = options.map((option) => {
-    return `<button class="test-option" type="button" data-answer="${escapeHtml(option)}">${escapeHtml(option)}</button>`;
-  }).join("");
+  $("englishTestOptions").innerHTML = options
+    .map((option) => `<button class="test-option" type="button" data-answer="${escapeHtml(option)}">${escapeHtml(option)}</button>`)
+    .join("");
 
   document.querySelectorAll("#englishTestOptions .test-option").forEach((button) => {
     button.addEventListener("click", () => checkEnglishTestAnswer(button.dataset.answer));
@@ -888,7 +889,17 @@ function updateFilteredChineseWords() {
 
   if (search) {
     list = list.filter((item) =>
-      [item.unit, item.hanzi, item.pinyin, item.meaning, item.example, item.russian]
+      [
+        item.unit,
+        item.hanzi,
+        item.pinyin,
+        item.meaning,
+        item.example,
+        item.examplePinyin,
+        item.exampleRussian,
+        item.russian,
+        item.russianExplanation,
+      ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(search))
     );
@@ -921,66 +932,81 @@ function fillChineseWordSelect() {
 
 function renderChineseCard() {
   if (!filteredChineseWords.length) {
-  if ($("chHanzi")) $("chHanzi").textContent = "No word";
-  if ($("chBackHanzi")) $("chBackHanzi").textContent = "No word";
-  if ($("chFrontMeaning")) $("chFrontMeaning").textContent = "";
-  if ($("chPinyin")) $("chPinyin").textContent = "";
-  if ($("chBackPinyin")) $("chBackPinyin").textContent = "";
-  if ($("chBackPinyinText")) $("chBackPinyinText").textContent = "";
-  if ($("chMeaning")) $("chMeaning").textContent = "Not found";
-  if ($("chExample")) $("chExample").textContent = "";
-  if ($("chRussian")) $("chRussian").textContent = "";
-  if ($("chExamplePinyin")) $("chExamplePinyin").textContent = "";
-if ($("chExampleRussian")) $("chExampleRussian").textContent = "";
-  if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
-  if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
-  if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
-  if ($("chProgressLine")) $("chProgressLine").style.width = "0%";
-  return;
-}
+    if ($("chHanzi")) $("chHanzi").textContent = "No word";
+    if ($("chBackHanzi")) $("chBackHanzi").textContent = "No word";
+    if ($("chFrontMeaning")) $("chFrontMeaning").textContent = "";
+    if ($("chPinyin")) $("chPinyin").textContent = "";
+    if ($("chBackPinyin")) $("chBackPinyin").textContent = "";
+    if ($("chBackPinyinText")) $("chBackPinyinText").textContent = "";
+    if ($("chMeaning")) $("chMeaning").textContent = "Not found";
+    if ($("chExample")) $("chExample").textContent = "";
+    if ($("chExamplePinyin")) $("chExamplePinyin").textContent = "";
+    if ($("chExampleRussian")) $("chExampleRussian").textContent = "";
+    if ($("chRussian")) $("chRussian").textContent = "";
+    if ($("chCurrentNumber")) $("chCurrentNumber").textContent = "0";
+    if ($("chTotalNumber")) $("chTotalNumber").textContent = "0";
+    if ($("chLearnedNumber")) $("chLearnedNumber").textContent = "0";
+    if ($("chProgressLine")) $("chProgressLine").style.width = "0%";
+    return;
+  }
 
   const item = filteredChineseWords[chineseIndex];
   const key = makeChineseLearnedKey(item);
   const isLearned = learnedChinese.has(key);
 
-  $("chUnit").textContent = item.unit || "UNIT-1";
-  $("chBackUnit").textContent = item.unit || "UNIT-1";
+  if ($("chUnit")) $("chUnit").textContent = item.unit || "UNIT-1";
+  if ($("chBackUnit")) $("chBackUnit").textContent = item.unit || "UNIT-1";
 
- $("chHanzi").textContent = item.hanzi || "";
-$("chBackHanzi").textContent = item.hanzi || "";
+  if ($("chHanzi")) $("chHanzi").textContent = item.hanzi || "";
+  if ($("chBackHanzi")) $("chBackHanzi").textContent = item.hanzi || "";
 
-if ($("chFrontMeaning")) {
-  $("chFrontMeaning").textContent = item.russian || item.meaning || "";
-}
+  if ($("chFrontMeaning")) {
+    $("chFrontMeaning").textContent = item.russian || item.meaning || "";
+  }
 
-$("chPinyin").textContent = item.pinyin || "";
-$("chBackPinyin").textContent = item.pinyin || "";
+  if ($("chPinyin")) $("chPinyin").textContent = item.pinyin || "";
+  if ($("chBackPinyin")) $("chBackPinyin").textContent = item.pinyin || "";
 
-$("chMeaning").textContent = item.meaning || "";
+  if ($("chMeaning")) $("chMeaning").textContent = item.meaning || "";
 
-if ($("chBackPinyinText")) {
-  $("chBackPinyinText").textContent = item.pinyin || "";
-}
-$("chExample").textContent = item.example || "";
+  if ($("chBackPinyinText")) {
+    $("chBackPinyinText").textContent = item.pinyin || "";
+  }
 
-if ($("chExamplePinyin")) {
-  $("chExamplePinyin").textContent = item.examplePinyin || "";
-}
+  if ($("chExample")) {
+    $("chExample").textContent = item.example || "";
+  }
 
-if ($("chExampleRussian")) {
-  $("chExampleRussian").textContent = item.exampleRussian || "";
-}
+  if ($("chExamplePinyin")) {
+    $("chExamplePinyin").textContent = item.examplePinyin || "";
+  }
 
-$("chRussian").textContent = item.russianExplanation || item.russian || item.meaning || "";
+  if ($("chExampleRussian")) {
+    $("chExampleRussian").textContent = item.exampleRussian || "";
+  }
 
-  $("chCurrentNumber").textContent = chineseIndex + 1;
-  $("chTotalNumber").textContent = filteredChineseWords.length;
+  if ($("chRussian")) {
+    $("chRussian").textContent = item.russianExplanation || item.russian || item.meaning || "";
+  }
 
-  const learnedCount = filteredChineseWords.filter((word) => learnedChinese.has(makeChineseLearnedKey(word))).length;
-  $("chLearnedNumber").textContent = learnedCount;
+  if ($("chCurrentNumber")) $("chCurrentNumber").textContent = chineseIndex + 1;
+  if ($("chTotalNumber")) $("chTotalNumber").textContent = filteredChineseWords.length;
 
-  $("chProgressLine").style.width = `${filteredChineseWords.length ? (learnedCount / filteredChineseWords.length) * 100 : 0}%`;
-  $("chLearnedBtn").textContent = isLearned ? "Уже выучила ✓" : "Выучила";
+  const learnedCount = filteredChineseWords.filter((word) =>
+    learnedChinese.has(makeChineseLearnedKey(word))
+  ).length;
+
+  if ($("chLearnedNumber")) $("chLearnedNumber").textContent = learnedCount;
+
+  if ($("chProgressLine")) {
+    $("chProgressLine").style.width = `${
+      filteredChineseWords.length ? (learnedCount / filteredChineseWords.length) * 100 : 0
+    }%`;
+  }
+
+  if ($("chLearnedBtn")) {
+    $("chLearnedBtn").textContent = isLearned ? "Уже выучила ✓" : "Выучила";
+  }
 
   if ($("chWordSelect")) $("chWordSelect").value = chineseIndex;
   if ($("chineseCard")) $("chineseCard").classList.remove("open");
@@ -1018,20 +1044,22 @@ function renderChineseAllWordsList() {
     return;
   }
 
-  box.innerHTML = filteredChineseWords.map((item, i) => {
-    const isLearned = learnedChinese.has(makeChineseLearnedKey(item));
+  box.innerHTML = filteredChineseWords
+    .map((item, i) => {
+      const isLearned = learnedChinese.has(makeChineseLearnedKey(item));
 
-    return `
-      <button class="word-list-item ${isLearned ? "learned" : ""}" type="button" data-ch-list-index="${i}">
-        <span class="word-list-number">${i + 1}</span>
-        <span class="word-list-hanzi">${escapeHtml(item.hanzi)}</span>
-        <span class="word-list-info">
-          <strong>${escapeHtml(item.pinyin)}</strong>
-          <small>${escapeHtml(item.meaning)} · ${escapeHtml(item.russian)}</small>
-        </span>
-      </button>
-    `;
-  }).join("");
+      return `
+        <button class="word-list-item ${isLearned ? "learned" : ""}" type="button" data-ch-list-index="${i}">
+          <span class="word-list-number">${i + 1}</span>
+          <span class="word-list-hanzi">${escapeHtml(item.hanzi)}</span>
+          <span class="word-list-info">
+            <strong>${escapeHtml(item.pinyin)}</strong>
+            <small>${escapeHtml(item.meaning)} · ${escapeHtml(item.russian)}</small>
+          </span>
+        </button>
+      `;
+    })
+    .join("");
 
   document.querySelectorAll("[data-ch-list-index]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1073,9 +1101,9 @@ function renderChineseTestQuestion() {
 
   const options = shuffleArray([item.meaning, ...wrong]);
 
-  $("chTestOptions").innerHTML = options.map((option) => {
-    return `<button class="test-option" type="button" data-answer="${escapeHtml(option)}">${escapeHtml(option)}</button>`;
-  }).join("");
+  $("chTestOptions").innerHTML = options
+    .map((option) => `<button class="test-option" type="button" data-answer="${escapeHtml(option)}">${escapeHtml(option)}</button>`)
+    .join("");
 
   document.querySelectorAll("#chTestOptions .test-option").forEach((button) => {
     button.addEventListener("click", () => checkChineseTestAnswer(button.dataset.answer));

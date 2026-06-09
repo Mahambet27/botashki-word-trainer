@@ -955,3 +955,20 @@ footer {
   font-weight: 850;
   line-height: 1.45;
 }
+
+
+.example-pinyin {
+  margin: 8px 0 0;
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.4;
+}
+
+.example-russian {
+  margin: 8px 0 0;
+  color: var(--dark);
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.45;
+}
